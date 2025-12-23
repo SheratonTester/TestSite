@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Room PM (RPM) – Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #e5f0ff;
+      --card: #ffffff;
+      --accent: #2563eb;
+      --accent-soft: rgba(37,99,235,0.08);
+      --text: #0f172a;
+      --muted: #6b7280;
+      --danger: #e11d48;
+      --success: #16a34a;
+      --border: #d1d5db;
+    }
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #e5f0ff, #f9fafb);
+      color: var(--text);
+      padding: 12px;
+    }
+    h1,h2,h3,h4 { margin: 0 0 8px; }
+    h1 { font-size: 1.25rem; }
+    h2 { font-size: 1.1rem; }
+    h3 { font-size: 1rem; }
+    p { margin: 4px 0; }
+
+    .app-shell {
+      max-width: 1100px;
+      margin: 0 auto 32px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+      box-shadow: 0 12px 30px rgba(15,23,42,0.12);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      border: 1px solid rgba(148,163,184,0.6);
+      color: var(--muted);
+      background: #f9fafb;
+      white-space: nowrap;
+    }
+    .pill.accent {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .pill.success {
+      border-color: var(--success);
+      color: var(--success);
+      background: rgba(34,197,94,0.12);
+    }
+    .pill.danger {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: rgba(248,113,113,0.12);
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .row > * {
+      flex: 1 1 120px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .field label {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    input, select, textarea {
+      font: inherit;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text);
+      padding: 6px 8px;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(37,99,235,0.3);
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #2563eb, #22c55e);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.8rem;
+      padding: 6px 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    button.secondary {
+      background: #f9fafb;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    button.danger {
+      background: linear-gradient(135deg, #fb7185, #e11d48);
+      color: #fef2f2;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
+    }
+    .metric-card {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 8px;
+      border: 1px solid var(--border);
+    }
+    .metric-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .metric-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .metric-note {
+      font-size: 0.65rem;
+      color: var(--muted);
+    }
+
+    .progress-wrapper {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      margin-top: 8px;
+    }
+    .progress-bar-outer {
+      flex: 0 0 32px;
+      height: 120px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #eef2ff;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+    }
+    .progress-bar-inner {
+      width: 100%;
+      background: linear-gradient(180deg, #22c55e, #16a34a);
+      transition: height 0.4s ease;
+      height: 0%;
+    }
+    .progress-meta {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    @media (min-width: 900px) {
+      .layout-main {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 12px;
+        align-items: flex-start;
+      }
+    }
+
+    /* Room map */
+    .room-map-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .room-chip {
+      border-radius: 10px;
+      padding: 4px 0;
+      font-size: 0.7rem;
+      text-align: center;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      background: #ffffff;
+      color: var(--muted);
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.15s ease;
+    }
+    .room-chip.done {
+      background: #dcfce7;
+      color: var(--success);
+      border-color: #16a34a;
+      font-weight: 600;
+    }
+    .room-chip.in-progress {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #2563eb;
+      font-weight: 600;
+    }
+    .room-chip.todo {
+      background: #f9fafb;
+      color: var(--muted);
+    }
+    .room-chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(15,23,42,0.3);
+    }
+    .room-legend {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 0.65rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 3px;
+    }
+    .legend-done { background: #16a34a; }
+    .legend-progress { background: #2563eb; }
+    .legend-todo { background: #9ca3af; }
+
+    /* Active session */
+    .timer-display {
+      font-family: ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 1.05rem;
+      letter-spacing: 0.06em;
+    }
+    .badge-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      font-size: 0.7rem;
+      margin-top: 4px;
+    }
+
+    /* Checklist */
+    .checklist {
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .question-block {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 6px;
+      background: #f9fafb;
+    }
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+    .question-text {
+      font-size: 0.8rem;
+    }
+    .question-section {
+      font-size: 0.65rem;
+      color: var(--muted);
+    }
+    .answer-buttons {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .answer-btn {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .answer-btn.selected.yes {
+      background: #dcfce7;
+      border-color: #16a34a;
+      color: var(--success);
+      font-weight: 600;
+    }
+    .answer-btn.selected.no {
+      background: #fee2e2;
+      border-color: #e11d48;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .answer-btn.selected.na {
+      background: #e5e7eb;
+      border-color: #9ca3af;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .question-meta {
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 3px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .question-meta span {
+      display: inline-block;
+    }
+
+    textarea {
+      min-height: 60px;
+      resize: vertical;
+    }
+
+    /* Sessions & inspection */
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+    .table th, .table td {
+      padding: 6px 4px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    .table th {
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 0.7rem;
+    }
+    .table small {
+      color: var(--muted);
+    }
+
+    /* Simple chart bars */
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .bar-label {
+      flex: 0 0 90px;
+      font-size: 0.7rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .bar-track {
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      background: #eef2ff;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2563eb, #22c55e);
+      transition: width 0.4s ease;
+    }
+    .bar-value {
+      font-size: 0.7rem;
+      color: var(--muted);
+      flex: 0 0 40px;
+      text-align: right;
+    }
+
+    .inspect-box {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px;
+      margin-bottom: 4px;
+      background: #f9fafb;
+    }
+
+    /* Admin demo panel */
+    .admin-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+    .admin-tab-btn {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .admin-tab-btn.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .admin-list {
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 4px;
+      font-size: 0.75rem;
+    }
+    .admin-list-item {
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    .admin-list-main {
+      flex: 1;
+    }
+    .admin-title {
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    .admin-sub {
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+    .admin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .admin-footer-actions {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .goal-text {
+      font-size: 0.8rem;
+      color: var(--text);
+      line-height: 1.4;
+    }
+    .goal-text ul {
+      padding-left: 20px;
+      margin: 6px 0;
+    }
+    .goal-note {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h1>Room PM (RPM) – Demo</h1>
+        <p style="font-size:0.75rem;color:var(--muted);">
+          Sheraton Fallsview · Room PM (RPM) / Seasonal PM workflow demo.<br>
+          <strong>This is not the final look – just a demo of the Seasonal PM flow.</strong>
+        </p>
+      </div>
+      <div style="text-align:right;">
+        <div class="pill accent">Logged in (demo): Alex Carter · Team Lead</div>
+        <div class="pill" style="margin-top:4px;">Designed &amp; managed by Gerry Dorion</div>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="metric-label">Period progress (demo data)</div>
+        <div class="row" style="gap:6px;margin-bottom:4px;">
+          <div class="field" style="margin-bottom:0;">
+            <label>Year</label>
+            <select id="yearSelect">
+              <option value="2025" selected>2025</option>
+              <option value="2024">2024</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label>Period</label>
+            <select id="periodSelect">
+              <option value="1" selected>Period 1</option>
+              <option value="2">Period 2</option>
+              <option value="3">Period 3</option>
+            </select>
+          </div>
+        </div>
+        <div class="progress-wrapper">
+          <div class="progress-bar-outer">
+            <div id="periodProgressBar" class="progress-bar-inner"></div>
+          </div>
+          <div class="progress-meta">
+            <div id="periodProgressLabel">0 / 0 rooms completed</div>
+            <div id="periodProgressPct">0% of target</div>
+            <div style="margin-top:4px;font-size:0.65rem;">
+              Demo target: every room completed once per period.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">Overview (demo)</div>
+        <div class="metric-value" id="summaryCompleted">0 completed</div>
+        <div class="metric-note" id="summaryTarget">Target: 0 · Δ 0</div>
+        <div class="metric-note" id="summaryAvgTime">Avg time: 0 min</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">Top engineer (inspection score)</div>
+        <div class="metric-value" id="topEngineerName">–</div>
+        <div class="metric-note" id="topEngineerScore">Avg score: –</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout-main">
+    <!-- LEFT: Room map + PM + checklist -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>Room Map (Demo)</h2>
+            <p style="font-size:0.75rem;color:var(--muted);">
+              Tap a room to pre-fill the PM form below.
+            </p>
+          </div>
+        </div>
+        <div class="room-map-grid" id="roomMap"></div>
+        <div class="room-legend">
+          <span><span class="legend-dot legend-done"></span>Completed (this period)</span>
+          <span><span class="legend-dot legend-progress"></span>Current active room</span>
+          <span><span class="legend-dot legend-todo"></span>Not yet done</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Active PM Session (Engineer demo)</h2>
+          <span class="pill accent" id="activeStatusPill">No active room</span>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Room number</label>
+            <input id="roomInput" type="text" inputmode="numeric" placeholder="e.g. 258">
+          </div>
+          <div class="field">
+            <label>Timer</label>
+            <div class="timer-display" id="timerDisplay">00:00</div>
+            <div class="badge-row" id="timerBadges"></div>
+          </div>
+        </div>
+        <div class="row" style="margin-bottom:8px;">
+          <button id="startBtn">Start PM</button>
+          <button id="pauseBtn" class="secondary" disabled>Pause</button>
+          <button id="resumeBtn" class="secondary" disabled>Resume</button>
+          <button id="completeBtn" disabled>Complete</button>
+          <button id="cancelBtn" class="danger" disabled>Cancel</button>
+        </div>
+        <div style="font-size:0.7rem;color:var(--muted);">
+          This demo keeps everything in your browser only. No data is sent anywhere.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Checklist (Demo)</h2>
+          <span class="pill">All questions must be answered to complete.</span>
+        </div>
+        <div class="checklist" id="checklistContainer"></div>
+        <div class="field">
+          <label>Overall room notes</label>
+          <textarea id="overallNotes" placeholder="Optional notes for this room"></textarea>
+        </div>
+        <button id="completeBtnBottom" style="margin-top:6px;">Complete PM (same as above)</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Sessions + inspection + ranking + admin -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <h2>Completed PMs (Demo)</h2>
+          <span class="pill">Tap "Inspect" to open review.</span>
+        </div>
+        <table class="table" id="sessionsTable">
+          <thead>
+          <tr>
+            <th>Room</th>
+            <th>Engineer</th>
+            <th>Duration</th>
+            <th>Status</th>
+            <th>Review</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Inspection (Team Lead demo)</h2>
+          <span class="pill success" id="inspectHeaderLabel">Select a completed PM</span>
+        </div>
+        <div id="inspectionPanel" style="font-size:0.75rem;color:var(--muted);">
+          No PM selected yet. Choose a row from "Completed PMs".
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Engineer Rankings (Demo)</h2>
+          <span class="pill">Based on inspection scores.</span>
+        </div>
+        <div id="rankingBars"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Admin Demo</h2>
+          <span class="pill">Edit demo engineers, rooms, questions</span>
+        </div>
+        <div class="admin-tabs">
+          <button type="button" class="admin-tab-btn active" data-tab="engineers">Engineers</button>
+          <button type="button" class="admin-tab-btn" data-tab="rooms">Rooms</button>
+          <button type="button" class="admin-tab-btn" data-tab="questions">Questions</button>
+        </div>
+        <div id="adminContent"></div>
+      </div>
+
+      <!-- GOAL SECTION -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Goal of this System (Demo)</h2>
+          <span class="pill">Prototype only – not final look</span>
+        </div>
+        <div class="goal-text">
+          <p>
+            This demo is the first step toward a full maintenance platform for our hotels.
+            The long-term goal is:
+          </p>
+          <ul>
+            <li>To run <strong>Room PM (RPM)</strong> and <strong>Mechanical PM</strong> on separate pages in one system.</li>
+            <li>To <strong>track project time and cost</strong> based on each employee’s hours.</li>
+            <li>To let <strong>each property see only its own data</strong>, while management can see performance for <strong>all properties</strong> in one place.</li>
+            <li>To show <strong>performance dashboards</strong> per property: average RPM time, inspection scores, open and completed projects, and trends.</li>
+            <li>To <strong>track FTE automatically</strong> based on hours worked and workload across all properties.</li>
+            <li>To handle <strong>item ordering, meter tracking, and other maintenance checklists</strong> inside this one system.</li>
+          </ul>
+          <p class="goal-note">
+            Final version will include multi-property views for management, plus RPM, mechanical PM, projects, and labour all in one place.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- Demo data (no Supabase, all in memory) ---
+
+  let demoRooms = [
+    "258","259","260","261","262",
+    "338","339","340",
+    "357","358","359","360",
+    "361","362","363","364"
+  ];
+
+  let demoEngineers = [
+    { code: "ENG001", name: "Alex Carter", role: "team_lead" },
+    { code: "ENG002", name: "Jordan Lee", role: "engineer" },
+    { code: "ENG003", name: "Samir Patel", role: "engineer" }
+  ];
+
+  let questions = [
+    { id: 1, section: "Bathroom", text: "Showers/tubs drain properly (no standing water)." },
+    { id: 2, section: "Bathroom", text: "No water escaping onto floor during shower." },
+    { id: 3, section: "Bathroom", text: "Bathroom fan runs and pulls air (tissue test at grille)." },
+    { id: 4, section: "Bathroom", text: "Hot water reaches taps quickly and stays stable." },
+    { id: 5, section: "Bathroom", text: "Sink drains freely and can hold water when needed." },
+    { id: 6, section: "Bathroom", text: "No mould, musty, or smoke odour present." },
+    { id: 7, section: "Bathroom", text: "Caulking and grout in good condition (no missing/black sections)." },
+    { id: 8, section: "Bathroom", text: "Faucet secure and not dripping." },
+    { id: 9, section: "HVAC", text: "Room gets to set temperature within a reasonable time." },
+    { id: 10, section: "HVAC", text: "Thermostat appears to respond to changes correctly." },
+    { id: 11, section: "Equipment", text: "Fridge working and door seals properly." },
+    { id: 12, section: "Equipment", text: "TV powers on and channels/inputs respond properly." }
+  ];
+
+  let nextQuestionId = 13;
+
+  const currentUser = demoEngineers[0]; // Team lead demo user
+
+  let nextSessionId = 100;
+
+  let sessions = [
+    {
+      id: 1,
+      roomNumber: "258",
+      engineerCode: "ENG001",
+      engineerName: "Alex Carter",
+      year: 2025,
+      period: 1,
+      status: "closed",
+      startedAt: "2025-01-05T09:00:00",
+      endedAt: "2025-01-05T09:25:00",
+      totalSeconds: 1500,
+      overallNotes: "Minor caulking touch-up done.",
+      answers: questions.map(q => ({
+        questionId: q.id,
+        answer: "yes",
+        note: ""
+      })),
+      review: {
+        reviewerName: "Alex Carter",
+        score: 100,
+        pass: true,
+        notes: "Model room.",
+        items: questions.map(q => ({ questionId: q.id, status: "pass", note: "" }))
+      }
+    },
+    {
+      id: 2,
+      roomNumber: "259",
+      engineerCode: "ENG002",
+      engineerName: "Jordan Lee",
+      year: 2025,
+      period: 1,
+      status: "closed",
+      startedAt: "2025-01-06T14:10:00",
+      endedAt: "2025-01-06T14:45:00",
+      totalSeconds: 2100,
+      overallNotes: "Shower door sweep ordered.",
+      answers: [
+        { questionId: 1, answer: "no", note: "Water pooling a bit." },
+        { questionId: 2, answer: "no", note: "Sweep damaged, work order created." },
+        { questionId: 3, answer: "yes" },
+        { questionId: 4, answer: "yes" },
+        { questionId: 5, answer: "yes" },
+        { questionId: 6, answer: "yes" },
+        { questionId: 7, answer: "no", note: "Caulking scheduled." },
+        { questionId: 8, answer: "yes" },
+        { questionId: 9, answer: "yes" },
+        { questionId: 10, answer: "yes" },
+        { questionId: 11, answer: "yes" },
+        { questionId: 12, answer: "yes" }
+      ],
+      review: {
+        reviewerName: "Alex Carter",
+        score: 80,
+        pass: true,
+        notes: "Good work, just watch bathroom details.",
+        items: [
+          { questionId: 1, status: "fail", note: "Drain still borderline." },
+          { questionId: 2, status: "fail", note: "" },
+          { questionId: 7, status: "fail", note: "" },
+          ...questions
+            .filter(q => ![1,2,7].includes(q.id))
+            .map(q => ({ questionId: q.id, status: "pass", note: "" }))
+        ]
+      }
+    },
+    {
+      id: 3,
+      roomNumber: "338",
+      engineerCode: "ENG003",
+      engineerName: "Samir Patel",
+      year: 2025,
+      period: 1,
+      status: "completed",
+      startedAt: "2025-01-07T10:00:00",
+      endedAt: "2025-01-07T10:32:00",
+      totalSeconds: 1920,
+      overallNotes: "Fan noise slightly high.",
+      answers: [
+        { questionId: 1, answer: "yes" },
+        { questionId: 2, answer: "yes" },
+        { questionId: 3, answer: "no", note: "Fan noisy; needs check." },
+        { questionId: 4, answer: "yes" },
+        { questionId: 5, answer: "yes" },
+        { questionId: 6, answer: "yes" },
+        { questionId: 7, answer: "yes" },
+        { questionId: 8, answer: "yes" },
+        { questionId: 9, answer: "yes" },
+        { questionId: 10, answer: "yes" },
+        { questionId: 11, answer: "yes" },
+        { questionId: 12, answer: "yes" }
+      ],
+      review: null
+    }
+  ];
+
+  let currentSession = null;
+  let currentAnswers = {};
+  let currentTimerInterval = null;
+  let currentTimerStart = null;
+  let selectedInspectionSessionId = null;
+  let currentReviewState = {};
+  let adminActiveTab = "engineers";
+
+  function formatSeconds(sec) {
+    sec = Math.max(0, Math.floor(sec));
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+  }
+
+  function getTotalRoomsForTarget() {
+    return demoRooms.length;
+  }
+
+  function getPeriodProgress(year, period) {
+    const filtered = sessions.filter(s =>
+      s.year === Number(year) &&
+      s.period === Number(period) &&
+      (s.status === "completed" || s.status === "closed")
+    );
+    const roomsDone = new Set(filtered.map(s => s.roomNumber));
+    const doneCount = roomsDone.size;
+    const totalRooms = getTotalRoomsForTarget();
+    const pct = totalRooms === 0
+      ? 0
+      : Math.round((doneCount / totalRooms) * 100);
+    return { doneCount, pct, totalRooms };
+  }
+
+  function getSummaryForTodayDemo() {
+    const completed = sessions.filter(s => s.status === "completed" || s.status === "closed");
+    const totalCompleted = completed.length;
+    const totalSeconds = completed.reduce((sum, s) => sum + (s.totalSeconds || 0), 0);
+    const avgSeconds = totalCompleted ? totalSeconds / totalCompleted : 0;
+    const targetPerDay = 10;
+    const target = targetPerDay;
+    const delta = totalCompleted - target;
+    return {
+      totalCompleted,
+      target,
+      delta,
+      avgSeconds
+    };
+  }
+
+  function computeEngineerScores() {
+    const map = {};
+    for (const s of sessions) {
+      if (!s.review) continue;
+      const code = s.engineerCode;
+      if (!map[code]) {
+        map[code] = { engineerCode: code, engineerName: s.engineerName, scores: [] };
+      }
+      if (typeof s.review.score === "number") {
+        map[code].scores.push(s.review.score);
+      }
+    }
+    const result = Object.values(map).map(e => {
+      const avg = e.scores.length
+        ? e.scores.reduce((a,b) => a + b, 0) / e.scores.length
+        : 0;
+      return {
+        engineerCode: e.engineerCode,
+        engineerName: e.engineName || e.engineerName,
+        avgScore: Math.round(avg)
+      };
+    });
+    result.sort((a,b) => b.avgScore - a.avgScore);
+    return result;
+  }
+
+  function computeRoomStatusForMap(roomNumber) {
+    if (currentSession && currentSession.roomNumber === roomNumber &&
+        (currentSession.status === "in_progress" || currentSession.status === "paused")) {
+      return "in-progress";
+    }
+    const year = Number(document.getElementById("yearSelect").value);
+    const period = Number(document.getElementById("periodSelect").value);
+    const anyCompleted = sessions.some(s =>
+      s.roomNumber === roomNumber &&
+      s.year === year &&
+      s.period === period &&
+      (s.status === "completed" || s.status === "closed")
+    );
+    return anyCompleted ? "done" : "todo";
+  }
+
+  function renderPeriodProgress() {
+    const year = document.getElementById("yearSelect").value;
+    const period = document.getElementById("periodSelect").value;
+    const { doneCount, pct, totalRooms } = getPeriodProgress(year, period);
+    const bar = document.getElementById("periodProgressBar");
+    const label = document.getElementById("periodProgressLabel");
+    const pctLabel = document.getElementById("periodProgressPct");
+
+    bar.style.height = pct + "%";
+    label.textContent = `${doneCount} / ${totalRooms} demo rooms completed`;
+    pctLabel.textContent = `${pct}% of period target (demo).`;
+  }
+
+  function renderSummary() {
+    const s = getSummaryForTodayDemo();
+    document.getElementById("summaryCompleted").textContent =
+      `${s.totalCompleted} PMs completed (demo)`;
+    document.getElementById("summaryTarget").textContent =
+      `Demo target: ${s.target} · Δ ${s.delta >= 0 ? "+" : ""}${s.delta}`;
+    document.getElementById("summaryAvgTime").textContent =
+      `Avg time: ${Math.round(s.avgSeconds/60)} min`;
+  }
+
+  function renderRoomMap() {
+    const container = document.getElementById("roomMap");
+    container.innerHTML = "";
+    demoRooms
+      .slice()
+      .sort((a,b) => Number(a) - Number(b))
+      .forEach(room => {
+        const div = document.createElement("div");
+        div.className = "room-chip " + computeRoomStatusForMap(room);
+        div.textContent = room;
+        div.title = "Click to start PM for room " + room;
+        div.addEventListener("click", () => {
+          const roomInput = document.getElementById("roomInput");
+          roomInput.value = room;
+          roomInput.blur();
+          document.getElementById("startBtn").scrollIntoView({ behavior:"smooth", block:"center" });
+        });
+        container.appendChild(div);
+      });
+  }
+
+  function resetCurrentAnswers() {
+    currentAnswers = {};
+    questions.forEach(q => {
+      currentAnswers[q.id] = { answer: null, note: "" };
+    });
+  }
+
+  function renderChecklist() {
+    const container = document.getElementById("checklistContainer");
+    container.innerHTML = "";
+    const sectionOrder = ["Bathroom","HVAC","Equipment"];
+
+    sectionOrder.forEach(sectionName => {
+      questions
+        .filter(q => q.section === sectionName)
+        .forEach(q => {
+          const block = document.createElement("div");
+          block.className = "question-block";
+          block.dataset.questionId = String(q.id);
+
+          const header = document.createElement("div");
+          header.className = "question-header";
+
+          const left = document.createElement("div");
+          const qText = document.createElement("div");
+          qText.className = "question-text";
+          qText.textContent = q.text;
+          const qSec = document.createElement("div");
+          qSec.className = "question-section";
+          qSec.textContent = sectionName;
+          left.appendChild(qText);
+          left.appendChild(qSec);
+
+          header.appendChild(left);
+          block.appendChild(header);
+
+          const btnRow = document.createElement("div");
+          btnRow.className = "answer-buttons";
+
+          ["yes","no","na"].forEach(kind => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "answer-btn " + kind;
+            btn.textContent = kind.toUpperCase();
+            btn.addEventListener("click", () => {
+              selectAnswer(q.id, kind, block, btn);
+            });
+            btnRow.appendChild(btn);
+          });
+
+          block.appendChild(btnRow);
+
+          const meta = document.createElement("div");
+          meta.className = "question-meta";
+          const ansSpan = document.createElement("span");
+          ansSpan.textContent = "Answer: –";
+          ansSpan.dataset.metaType = "answer";
+          const noteSpan = document.createElement("span");
+          noteSpan.textContent = "";
+          noteSpan.dataset.metaType = "note";
+
+          const noteBtn = document.createElement("button");
+          noteBtn.type = "button";
+          noteBtn.className = "secondary";
+          noteBtn.style.fontSize = "0.65rem";
+          noteBtn.textContent = "Add note";
+          noteBtn.addEventListener("click", () => {
+            const note = prompt("Note for this question:", currentAnswers[q.id].note || "");
+            if (note !== null) {
+              currentAnswers[q.id].note = note.trim();
+              noteSpan.textContent = note ? `Note: ${note}` : "";
+            }
+          });
+
+          meta.appendChild(ansSpan);
+          meta.appendChild(noteSpan);
+          meta.appendChild(noteBtn);
+          block.appendChild(meta);
+
+          container.appendChild(block);
+        });
+    });
+  }
+
+  function selectAnswer(questionId, answer, block, clickedBtn) {
+    currentAnswers[questionId].answer = answer;
+    const btns = block.querySelectorAll(".answer-btn");
+    btns.forEach(btn => {
+      btn.classList.remove("selected", "yes", "no", "na");
+      if (btn === clickedBtn) {
+        btn.classList.add("selected", answer);
+      }
+    });
+    const metaAns = block.querySelector(".question-meta span[data-meta-type='answer']");
+    if (metaAns) {
+      metaAns.textContent = "Answer: " + answer.toUpperCase();
+    }
+  }
+
+  function renderActiveSession() {
+    const pill = document.getElementById("activeStatusPill");
+    const badges = document.getElementById("timerBadges");
+    badges.innerHTML = "";
+
+    if (!currentSession) {
+      pill.textContent = "No active room";
+      pill.className = "pill accent";
+      return;
+    }
+
+    const statusLabel = currentSession.status === "in_progress" ? "In progress" :
+                        currentSession.status === "paused" ? "Paused" :
+                        currentSession.status;
+    pill.textContent = `Room ${currentSession.roomNumber} · ${statusLabel}`;
+    pill.className = "pill accent";
+
+    const b1 = document.createElement("span");
+    b1.className = "pill";
+    b1.textContent = `Engineer (demo): ${currentSession.engineerName}`;
+    badges.appendChild(b1);
+
+    const b2 = document.createElement("span");
+    b2.className = "pill";
+    b2.textContent = `Period: ${currentSession.period}, Year: ${currentSession.year}`;
+    badges.appendChild(b2);
+  }
+
+  function renderTimer() {
+    const display = document.getElementById("timerDisplay");
+    if (!currentSession) {
+      display.textContent = "00:00";
+      return;
+    }
+    let base = currentSession.totalSeconds || 0;
+    if (currentSession.status === "in_progress" && currentTimerStart != null) {
+      const elapsed = (Date.now() - currentTimerStart) / 1000;
+      base += elapsed;
+    }
+    display.textContent = formatSeconds(base);
+  }
+
+  function startTimer() {
+    if (currentTimerInterval) clearInterval(currentTimerInterval);
+    currentTimerStart = Date.now();
+    currentTimerInterval = setInterval(renderTimer, 1000);
+  }
+
+  function pauseTimer() {
+    if (!currentSession || currentSession.status !== "in_progress") return;
+    const elapsed = (Date.now() - currentTimerStart) / 1000;
+    currentSession.totalSeconds = (currentSession.totalSeconds || 0) + elapsed;
+    currentTimerStart = null;
+    currentSession.status = "paused";
+    if (currentTimerInterval) clearInterval(currentTimerInterval);
+    renderTimer();
+    renderActiveSession();
+  }
+
+  function stopTimerAndComplete() {
+    if (!currentSession) return;
+    if (currentSession.status === "in_progress" && currentTimerStart != null) {
+      const elapsed = (Date.now() - currentTimerStart) / 1000;
+      currentSession.totalSeconds = (currentSession.totalSeconds || 0) + elapsed;
+    }
+    currentTimerStart = null;
+    if (currentTimerInterval) clearInterval(currentTimerInterval);
+    currentTimerInterval = null;
+    renderTimer();
+  }
+
+  function clearActiveSessionState() {
+    currentSession = null;
+    currentTimerStart = null;
+    if (currentTimerInterval) clearInterval(currentTimerInterval);
+    currentTimerInterval = null;
+    renderTimer();
+    renderActiveSession();
+    document.getElementById("roomInput").value = "";
+    document.getElementById("overallNotes").value = "";
+    resetCurrentAnswers();
+    renderChecklist();
+    updateButtonsForStatus();
+    renderRoomMap();
+  }
+
+  function updateButtonsForStatus() {
+    const startBtn = document.getElementById("startBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+    const resumeBtn = document.getElementById("resumeBtn");
+    const completeBtn = document.getElementById("completeBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const completeBottom = document.getElementById("completeBtnBottom");
+
+    if (!currentSession) {
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      resumeBtn.disabled = true;
+      completeBtn.disabled = true;
+      cancelBtn.disabled = true;
+      completeBottom.disabled = true;
+      return;
+    }
+
+    if (currentSession.status === "in_progress") {
+      startBtn.disabled = true;
+      pauseBtn.disabled = false;
+      resumeBtn.disabled = true;
+      completeBtn.disabled = false;
+      cancelBtn.disabled = false;
+      completeBottom.disabled = false;
+    } else if (currentSession.status === "paused") {
+      startBtn.disabled = true;
+      pauseBtn.disabled = true;
+      resumeBtn.disabled = false;
+      completeBtn.disabled = false;
+      cancelBtn.disabled = false;
+      completeBottom.disabled = false;
+    } else {
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      resumeBtn.disabled = true;
+      completeBtn.disabled = true;
+      cancelBtn.disabled = true;
+      completeBottom.disabled = true;
+    }
+  }
+
+  function allQuestionsAnswered() {
+    return questions.every(q => {
+      const ans = currentAnswers[q.id];
+      return ans && ans.answer;
+    });
+  }
+
+  function renderSessionsTable() {
+    const tbody = document.querySelector("#sessionsTable tbody");
+    tbody.innerHTML = "";
+    sessions
+      .filter(s => s.status === "completed" || s.status === "closed")
+      .sort((a,b) => a.id - b.id)
+      .forEach(s => {
+        const tr = document.createElement("tr");
+
+        const tdRoom = document.createElement("td");
+        tdRoom.textContent = s.roomNumber;
+        tr.appendChild(tdRoom);
+
+        const tdEng = document.createElement("td");
+        tdEng.textContent = s.engineerName;
+        tr.appendChild(tdEng);
+
+        const tdDur = document.createElement("td");
+        tdDur.textContent = formatSeconds(s.totalSeconds || 0);
+        tr.appendChild(tdDur);
+
+        const tdStatus = document.createElement("td");
+        tdStatus.textContent = s.status === "closed" ? "Closed" : "Completed";
+        tr.appendChild(tdStatus);
+
+        const tdRev = document.createElement("td");
+        if (s.review) {
+          tdRev.innerHTML = `<span style="color:${s.review.pass ? '#16a34a' : '#e11d48'};">${s.review.pass ? "Pass" : "Fail"}</span><br><small>${s.review.score}%</small>`;
+        } else {
+          tdRev.innerHTML = `<span style="color:#f59e0b;">Not reviewed</span>`;
+        }
+        tr.appendChild(tdRev);
+
+        const tdAction = document.createElement("td");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "Inspect";
+        btn.className = "secondary";
+        btn.addEventListener("click", () => openInspection(s.id));
+        tdAction.appendChild(btn);
+        tr.appendChild(tdAction);
+
+        tbody.appendChild(tr);
+      });
+  }
+
+  function renderRanking() {
+    const container = document.getElementById("rankingBars");
+    container.innerHTML = "";
+    const scores = computeEngineerScores();
+    if (!scores.length) {
+      container.textContent = "No inspections yet in this demo.";
+      document.getElementById("topEngineerName").textContent = "–";
+      document.getElementById("topEngineerScore").textContent = "Avg score: –";
+      return;
+    }
+    scores.forEach(e => {
+      const row = document.createElement("div");
+      row.className = "bar-row";
+      const lbl = document.createElement("div");
+      lbl.className = "bar-label";
+      lbl.textContent = e.engineerName;
+      const track = document.createElement("div");
+      track.className = "bar-track";
+      const fill = document.createElement("div");
+      fill.className = "bar-fill";
+      fill.style.width = e.avgScore + "%";
+      track.appendChild(fill);
+      const val = document.createElement("div");
+      val.className = "bar-value";
+      val.textContent = e.avgScore + "%";
+      row.appendChild(lbl);
+      row.appendChild(track);
+      row.appendChild(val);
+      container.appendChild(row);
+    });
+
+    const top = scores[0];
+    document.getElementById("topEngineerName").textContent = top.engineerName;
+    document.getElementById("topEngineerScore").textContent = `Avg score: ${top.avgScore}%`;
+  }
+
+  function openInspection(sessionId) {
+    selectedInspectionSessionId = sessionId;
+    const session = sessions.find(s => s.id === sessionId);
+    const headerLabel = document.getElementById("inspectHeaderLabel");
+    headerLabel.textContent = `Inspecting room ${session.roomNumber} · ${session.engineerName}`;
+    headerLabel.className = "pill success";
+
+    currentReviewState = {};
+    const existing = session.review;
+    if (existing && existing.items) {
+      existing.items.forEach(item => {
+        currentReviewState[item.questionId] = item.status;
+      });
+    } else {
+      questions.forEach(q => {
+        currentReviewState[q.id] = "na";
+      });
+    }
+
+    const panel = document.getElementById("inspectionPanel");
+    panel.innerHTML = "";
+
+    const info = document.createElement("div");
+    info.style.marginBottom = "6px";
+    info.innerHTML = `
+      <div style="margin-bottom:4px;">Room <strong>${session.roomNumber}</strong> · Engineer <strong>${session.engineerName}</strong></div>
+      <div style="font-size:0.7rem;color:var(--muted);">
+        Duration: ${formatSeconds(session.totalSeconds || 0)} · Status: ${session.status === "closed" ? "Closed" : "Completed (awaiting review)"}
+      </div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">
+        Engineer notes: ${session.overallNotes || "<em>None</em>"}
+      </div>
+    `;
+    panel.appendChild(info);
+
+    const list = document.createElement("div");
+    list.style.maxHeight = "240px";
+    list.style.overflowY = "auto";
+    list.style.paddingRight = "4px";
+
+    questions.forEach(q => {
+      const ans = session.answers.find(a => a.questionId === q.id);
+      const engineerAnswer = ans ? ans.answer.toUpperCase() : "–";
+      const engineerNote = ans && ans.note ? ans.note : "";
+
+      const box = document.createElement("div");
+      box.className = "inspect-box";
+
+      const title = document.createElement("div");
+      title.style.fontSize = "0.8rem";
+      title.textContent = q.text;
+      box.appendChild(title);
+
+      const sub = document.createElement("div");
+      sub.style.fontSize = "0.7rem";
+      sub.style.color = "var(--muted)";
+      sub.innerHTML = `
+        Engineer answer: <strong>${engineerAnswer}</strong>
+        ${engineerNote ? `· Note: ${engineerNote}` : ""}
+      `;
+      box.appendChild(sub);
+
+      const controls = document.createElement("div");
+      controls.style.display = "flex";
+      controls.style.flexWrap = "wrap";
+      controls.style.gap = "4px";
+      controls.style.marginTop = "4px";
+
+      ["pass","fail","na"].forEach(kind => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "answer-btn " + (kind === "pass" ? "yes" : kind === "fail" ? "no" : "na");
+        btn.style.fontSize = "0.7rem";
+        btn.textContent = kind.toUpperCase();
+        if (currentReviewState[q.id] === kind) {
+          btn.classList.add("selected");
+        }
+        btn.addEventListener("click", () => {
+          currentReviewState[q.id] = kind;
+          const siblings = controls.querySelectorAll(".answer-btn");
+          siblings.forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+        });
+        controls.appendChild(btn);
+      });
+
+      box.appendChild(controls);
+      list.appendChild(box);
+    });
+
+    panel.appendChild(list);
+
+    const notesField = document.createElement("div");
+    notesField.className = "field";
+    notesField.style.marginTop = "6px";
+    const label = document.createElement("label");
+    label.textContent = "Overall review notes";
+    const textarea = document.createElement("textarea");
+    textarea.id = "reviewNotes";
+    textarea.placeholder = "Summary of this inspection (demo).";
+    textarea.value = session.review && session.review.notes ? session.review.notes : "";
+    notesField.appendChild(label);
+    notesField.appendChild(textarea);
+    panel.appendChild(notesField);
+
+    const actionRow = document.createElement("div");
+    actionRow.style.marginTop = "6px";
+    actionRow.style.display = "flex";
+    actionRow.style.gap = "6px";
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.textContent = "Save review";
+    const passFailHint = document.createElement("div");
+    passFailHint.style.fontSize = "0.7rem";
+    passFailHint.style.color = "var(--muted)";
+    passFailHint.style.marginLeft = "8px";
+    passFailHint.textContent = "Score is based on PASS vs FAIL (NA ignored).";
+
+    saveBtn.addEventListener("click", () => {
+      saveReviewForSession(session.id);
+    });
+
+    actionRow.appendChild(saveBtn);
+    panel.appendChild(actionRow);
+    panel.appendChild(passFailHint);
+  }
+
+  function saveReviewForSession(sessionId) {
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session) return;
+    const notes = document.getElementById("reviewNotes").value.trim();
+
+    let passCount = 0;
+    let failCount = 0;
+    questions.forEach(q => {
+      const st = currentReviewState[q.id];
+      if (st === "pass") passCount++;
+      else if (st === "fail") failCount++;
+    });
+    const denom = passCount + failCount;
+    const score = denom ? Math.round((passCount / denom) * 100) : 0;
+    const passBool = failCount === 0;
+
+    const items = questions.map(q => ({
+      questionId: q.id,
+      status: currentReviewState[q.id] || "na",
+      note: ""
+    }));
+
+    session.review = {
+      reviewerName: currentUser.name,
+      score,
+      pass: passBool,
+      notes
+    };
+    session.review.items = items;
+    session.status = "closed";
+
+    renderSessionsTable();
+    renderRanking();
+    renderSummary();
+    renderPeriodProgress();
+    renderRoomMap();
+
+    const headerLabel = document.getElementById("inspectHeaderLabel");
+    headerLabel.textContent = `Review saved · Score ${session.review.score}%`;
+    headerLabel.className = "pill success";
+  }
+
+  // --- Admin demo panel ---
+
+  function renameRoom(oldRoom, newRoom) {
+    const idx = demoRooms.indexOf(oldRoom);
+    if (idx !== -1) {
+      demoRooms[idx] = newRoom;
+    }
+    sessions.forEach(s => {
+      if (s.roomNumber === oldRoom) {
+        s.roomNumber = newRoom;
+      }
+    });
+  }
+
+  function renderAdminEngineers(container) {
+    const list = document.createElement("div");
+    list.className = "admin-list";
+
+    demoEngineers.forEach(eng => {
+      const item = document.createElement("div");
+      item.className = "admin-list-item";
+
+      const main = document.createElement("div");
+      main.className = "admin-list-main";
+      const title = document.createElement("div");
+      title.className = "admin-title";
+      title.textContent = eng.name;
+      const sub = document.createElement("div");
+      sub.className = "admin-sub";
+      sub.textContent = `Code: ${eng.code} · Role: ${eng.role}`;
+      main.appendChild(title);
+      main.appendChild(sub);
+
+      const actions = document.createElement("div");
+      actions.className = "admin-actions";
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "secondary";
+      editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => {
+        const newName = prompt("Engineer name:", eng.name);
+        if (newName === null) return;
+        const newRole = prompt("Role (engineer/team_lead/admin):", eng.role);
+        if (newRole === null) return;
+        const trimmedName = newName.trim();
+        const trimmedRole = (newRole || "").trim().toLowerCase();
+        if (trimmedName) eng.name = trimmedName;
+        if (["engineer","team_lead","admin"].includes(trimmedRole)) {
+          eng.role = trimmedRole;
+        }
+        if (eng.code === currentUser.code) {
+          currentUser.name = eng.name;
+        }
+        sessions.forEach(s => {
+          if (s.engineerCode === eng.code) {
+            s.engineerName = eng.name;
+          }
+        });
+        renderAdminPanel();
+        renderSessionsTable();
+        renderRanking();
+        renderActiveSession();
+      });
+      actions.appendChild(editBtn);
+
+      item.appendChild(main);
+      item.appendChild(actions);
+      list.appendChild(item);
+    });
+
+    container.appendChild(list);
+
+    const footer = document.createElement("div");
+    footer.className = "admin-footer-actions";
+    const addBtn = document.createElement("button");
+    addBtn.type = "button";
+    addBtn.textContent = "Add engineer";
+    addBtn.className = "secondary";
+    addBtn.addEventListener("click", () => {
+      const name = prompt("New engineer name:");
+      if (!name || !name.trim()) return;
+      const code = prompt("Login code (demo):", "ENG" + String(demoEngineers.length + 1).padStart(3,"0"));
+      if (!code || !code.trim()) return;
+      const role = prompt("Role (engineer/team_lead/admin):", "engineer") || "engineer";
+      demoEngineers.push({
+        code: code.trim(),
+        name: name.trim(),
+        role: role.trim().toLowerCase()
+      });
+      renderAdminPanel();
+    });
+    footer.appendChild(addBtn);
+
+    const info = document.createElement("div");
+    info.style.fontSize = "0.65rem";
+    info.style.color = "var(--muted)";
+    info.textContent = "Demo only: this does not affect Supabase or real users.";
+    footer.appendChild(info);
+
+    container.appendChild(footer);
+  }
+
+  function renderAdminRooms(container) {
+    const list = document.createElement("div");
+    list.className = "admin-list";
+
+    demoRooms
+      .slice()
+      .sort((a,b) => Number(a) - Number(b))
+      .forEach(room => {
+        const item = document.createElement("div");
+        item.className = "admin-list-item";
+
+        const main = document.createElement("div");
+        main.className = "admin-list-main";
+        const title = document.createElement("div");
+        title.className = "admin-title";
+        title.textContent = `Room ${room}`;
+        const sub = document.createElement("div");
+        sub.className = "admin-sub";
+        sub.textContent = "Demo room entry";
+        main.appendChild(title);
+        main.appendChild(sub);
+
+        const actions = document.createElement("div");
+        actions.className = "admin-actions";
+        const editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.className = "secondary";
+        editBtn.textContent = "Edit";
+        editBtn.addEventListener("click", () => {
+          const newRoom = prompt("New room number:", room);
+          if (newRoom === null) return;
+          const trimmed = newRoom.trim();
+          if (!trimmed) return;
+          renameRoom(room, trimmed);
+          renderAdminPanel();
+          renderRoomMap();
+          renderSessionsTable();
+          renderPeriodProgress();
+        });
+        actions.appendChild(editBtn);
+
+        item.appendChild(main);
+        item.appendChild(actions);
+        list.appendChild(item);
+      });
+
+    container.appendChild(list);
+
+    const footer = document.createElement("div");
+    footer.className = "admin-footer-actions";
+    const addBtn = document.createElement("button");
+    addBtn.type = "button";
+    addBtn.textContent = "Add room";
+    addBtn.className = "secondary";
+    addBtn.addEventListener("click", () => {
+      const newRoom = prompt("Room number to add (demo):");
+      if (!newRoom || !newRoom.trim()) return;
+      const val = newRoom.trim();
+      if (!demoRooms.includes(val)) {
+        demoRooms.push(val);
+      }
+      renderAdminPanel();
+      renderRoomMap();
+      renderPeriodProgress();
+    });
+    footer.appendChild(addBtn);
+
+    const info = document.createElement("div");
+    info.style.fontSize = "0.65rem";
+    info.style.color = "var(--muted)";
+    info.textContent = "Demo only: does not change your real room list.";
+    footer.appendChild(info);
+
+    container.appendChild(footer);
+  }
+
+  function renderAdminQuestions(container) {
+    const list = document.createElement("div");
+    list.className = "admin-list";
+
+    questions.forEach(q => {
+      const item = document.createElement("div");
+      item.className = "admin-list-item";
+
+      const main = document.createElement("div");
+      main.className = "admin-list-main";
+      const title = document.createElement("div");
+      title.className = "admin-title";
+      title.textContent = q.text;
+      const sub = document.createElement("div");
+      sub.className = "admin-sub";
+      sub.textContent = `Section: ${q.section} · ID: ${q.id}`;
+      main.appendChild(title);
+      main.appendChild(sub);
+
+      const actions = document.createElement("div");
+      actions.className = "admin-actions";
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "secondary";
+      editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => {
+        const newText = prompt("Question text:", q.text);
+        if (newText === null) return;
+        const newSection = prompt("Section (Bathroom/HVAC/Equipment):", q.section);
+        if (newSection === null) return;
+        const t = newText.trim();
+        const s = newSection.trim();
+        if (t) q.text = t;
+        if (s) q.section = s;
+        renderAdminPanel();
+        renderChecklist();
+        if (selectedInspectionSessionId) {
+          openInspection(selectedInspectionSessionId);
+        }
+      });
+      actions.appendChild(editBtn);
+
+      item.appendChild(main);
+      item.appendChild(actions);
+      list.appendChild(item);
+    });
+
+    container.appendChild(list);
+
+    const footer = document.createElement("div");
+    footer.className = "admin-footer-actions";
+    const addBtn = document.createElement("button");
+    addBtn.type = "button";
+    addBtn.textContent = "Add question";
+    addBtn.className = "secondary";
+    addBtn.addEventListener("click", () => {
+      const section = prompt("Section (Bathroom/HVAC/Equipment or other):", "Bathroom");
+      if (section === null) return;
+      const text = prompt("Question text:");
+      if (!text || !text.trim()) return;
+      questions.push({
+        id: nextQuestionId++,
+        section: section.trim(),
+        text: text.trim()
+      });
+      renderAdminPanel();
+      renderChecklist();
+    });
+    footer.appendChild(addBtn);
+
+    const info = document.createElement("div");
+    info.style.fontSize = "0.65rem";
+    info.style.color = "var(--muted)";
+    info.textContent = "Demo only: use this to try different wording and sections.";
+    footer.appendChild(info);
+
+    container.appendChild(footer);
+  }
+
+  function renderAdminPanel() {
+    const container = document.getElementById("adminContent");
+    if (!container) return;
+    container.innerHTML = "";
+
+    document.querySelectorAll(".admin-tab-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.tab === adminActiveTab);
+    });
+
+    if (adminActiveTab === "engineers") {
+      renderAdminEngineers(container);
+    } else if (adminActiveTab === "rooms") {
+      renderAdminRooms(container);
+    } else {
+      renderAdminQuestions(container);
+    }
+  }
+
+  function hookKeyboardEnterToBlur() {
+    function handleKey(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        e.target.blur();
+      }
+    }
+    document.querySelectorAll("input, textarea").forEach(el => {
+      el.addEventListener("keydown", handleKey);
+    });
+  }
+
+  function attachEvents() {
+    document.getElementById("yearSelect").addEventListener("change", () => {
+      renderPeriodProgress();
+      renderRoomMap();
+    });
+    document.getElementById("periodSelect").addEventListener("change", () => {
+      renderPeriodProgress();
+      renderRoomMap();
+    });
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+      const room = document.getElementById("roomInput").value.trim();
+      if (!room) {
+        alert("Enter a room number to start the PM (demo).");
+        return;
+      }
+      if (currentSession &&
+          (currentSession.status === "in_progress" || currentSession.status === "paused")) {
+        const ok = confirm("There is already an active/paused PM. This demo will cancel it and start a new one. Continue?");
+        if (!ok) return;
+      }
+      const now = new Date();
+      currentSession = {
+        id: nextSessionId++,
+        roomNumber: room,
+        engineerCode: currentUser.code,
+        engineerName: currentUser.name,
+        year: 2025,
+        period: Number(document.getElementById("periodSelect").value) || 1,
+        status: "in_progress",
+        startedAt: now.toISOString(),
+        endedAt: null,
+        totalSeconds: 0,
+        overallNotes: "",
+        answers: []
+      };
+      resetCurrentAnswers();
+      renderChecklist();
+      renderActiveSession();
+      renderRoomMap();
+      updateButtonsForStatus();
+      startTimer();
+    });
+
+    document.getElementById("pauseBtn").addEventListener("click", () => {
+      pauseTimer();
+      updateButtonsForStatus();
+      renderRoomMap();
+    });
+
+    document.getElementById("resumeBtn").addEventListener("click", () => {
+      if (!currentSession) return;
+      currentSession.status = "in_progress";
+      startTimer();
+      updateButtonsForStatus();
+      renderActiveSession();
+      renderRoomMap();
+    });
+
+    function completeFlow() {
+      if (!currentSession) {
+        alert("No active PM to complete (demo).");
+        return;
+      }
+      if (!allQuestionsAnswered()) {
+        alert("Please answer all questions before completing this PM (demo).");
+        return;
+      }
+      stopTimerAndComplete();
+      currentSession.status = "completed";
+      currentSession.endedAt = new Date().toISOString();
+      currentSession.overallNotes = document.getElementById("overallNotes").value.trim();
+      currentSession.answers = questions.map(q => ({
+        questionId: q.id,
+        answer: currentAnswers[q.id].answer,
+        note: currentAnswers[q.id].note || ""
+      }));
+      sessions.push(currentSession);
+      renderSessionsTable();
+      renderSummary();
+      renderPeriodProgress();
+      renderRoomMap();
+      clearActiveSessionState();
+    }
+
+    document.getElementById("completeBtn").addEventListener("click", completeFlow);
+    document.getElementById("completeBtnBottom").addEventListener("click", completeFlow);
+
+    document.getElementById("cancelBtn").addEventListener("click", () => {
+      if (!currentSession) return;
+      const ok = confirm("Cancel this PM? (Demo only – this just clears the active session.)");
+      if (!ok) return;
+      clearActiveSessionState();
+    });
+
+    document.querySelectorAll(".admin-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        adminActiveTab = btn.dataset.tab;
+        renderAdminPanel();
+      });
+    });
+
+    hookKeyboardEnterToBlur();
+  }
+
+  function initDemo() {
+    resetCurrentAnswers();
+    renderChecklist();
+    renderPeriodProgress();
+    renderSummary();
+    renderRoomMap();
+    renderActiveSession();
+    renderTimer();
+    renderSessionsTable();
+    renderRanking();
+    renderAdminPanel();
+    attachEvents();
+    setInterval(renderTimer, 1000);
+  }
+
+  document.addEventListener("DOMContentLoaded", initDemo);
+</script>
+</body>
+</html>
