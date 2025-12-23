@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Room PM (RPM) – Demo</title>
+  <title>RPM & Mechanical PM – Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root {
@@ -75,7 +75,7 @@
     }
     .pill.danger {
       border-color: var(--danger);
-      color: var(--danger);
+      color: rgba(190,24,93,1);
       background: rgba(248,113,113,0.12);
     }
 
@@ -203,7 +203,7 @@
       }
     }
 
-    /* Room map */
+    /* Room / unit map */
     .room-map-scroll {
       max-height: 240px;
       overflow-y: auto;
@@ -291,7 +291,37 @@
       font-weight: 600;
     }
 
-    /* Active session */
+    /* Mode toggle */
+    .mode-toggle {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .mode-btn {
+      font: inherit;
+      cursor: pointer;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--muted);
+      padding: 4px 10px;
+      font-size: 0.75rem;
+    }
+    .mode-btn.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .mode-btn:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Active sessions */
     .timer-display {
       font-family: ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 1.05rem;
@@ -531,225 +561,415 @@
 </head>
 <body>
 <div class="app-shell">
+
+  <!-- HEADER + MODE BUTTONS -->
   <div class="card">
     <div class="card-header">
       <div>
-        <h1>Room PM (RPM) – Demo</h1>
+        <h1>RPM &amp; Mechanical PM – Demo</h1>
         <p style="font-size:0.75rem;color:var(--muted);">
-          Sheraton Fallsview · Room PM (RPM) workflow demo.<br>
-          <strong>This is not the final look – just a demo version of the Room PM (RPM) flow.</strong>
+          Sheraton Fallsview · Preventive maintenance workflow demo (rooms + mechanical).
         </p>
       </div>
       <div style="text-align:right;">
-        <div class="pill accent">Logged in (demo): Alex Carter · Team Lead</div>
+        <div class="pill accent">Demo login: Alex Carter · Team Lead</div>
         <div class="pill" style="margin-top:4px;">Designed &amp; managed by Gerry Dorion</div>
       </div>
     </div>
+    <div class="mode-toggle">
+      <span style="font-size:0.75rem;color:var(--muted);margin-right:4px;">View mode:</span>
+      <button type="button" class="mode-btn active" data-mode="RPM">
+        RPM (Guest rooms)
+      </button>
+      <button type="button" class="mode-btn" data-mode="PM">
+        PM (Mechanical)
+      </button>
+    </div>
+  </div>
 
-    <div class="metrics">
-      <div class="metric-card">
-        <div class="metric-label">Period progress (demo data)</div>
-        <div class="row" style="gap:6px;margin-bottom:4px;">
-          <div class="field" style="margin-bottom:0;">
-            <label>Year</label>
-            <select id="yearSelect">
-              <option value="2025" selected>2025</option>
-              <option value="2024">2024</option>
-            </select>
-          </div>
-          <div class="field" style="margin-bottom:0;">
-            <label>Period</label>
-            <select id="periodSelect">
-              <option value="1" selected>Period 1</option>
-              <option value="2">Period 2</option>
-              <option value="3">Period 3</option>
-            </select>
-          </div>
+  <!-- RPM SECTION (ROOMS) -->
+  <div id="rpmSection">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>RPM – Rooms Overview (Demo)</h2>
+          <p style="font-size:0.75rem;color:var(--muted);">
+            Demo of guest room RPM progress, engineer scores, and ranking.
+          </p>
         </div>
-        <div class="progress-wrapper">
-          <div class="progress-bar-outer">
-            <div id="periodProgressBar" class="progress-bar-inner"></div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric-card">
+          <div class="metric-label">RPM period progress (demo data)</div>
+          <div class="row" style="gap:6px;margin-bottom:4px;">
+            <div class="field" style="margin-bottom:0;">
+              <label>Year</label>
+              <select id="yearSelect">
+                <option value="2025" selected>2025</option>
+                <option value="2024">2024</option>
+              </select>
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>Period</label>
+              <select id="periodSelect">
+                <option value="1" selected>Period 1</option>
+                <option value="2">Period 2</option>
+                <option value="3">Period 3</option>
+              </select>
+            </div>
           </div>
-          <div class="progress-meta">
-            <div id="periodProgressLabel">0 / 0 rooms completed</div>
-            <div id="periodProgressPct">0% of target</div>
-            <div style="margin-top:4px;font-size:0.65rem;">
-              Demo target: every room completed once per period.
+          <div class="progress-wrapper">
+            <div class="progress-bar-outer">
+              <div id="periodProgressBar" class="progress-bar-inner"></div>
+            </div>
+            <div class="progress-meta">
+              <div id="periodProgressLabel">0 / 0 demo rooms completed</div>
+              <div id="periodProgressPct">0% of target</div>
+              <div style="margin-top:4px;font-size:0.65rem;">
+                Demo target: every room completed once per period.
+              </div>
             </div>
           </div>
         </div>
+
+        <div class="metric-card">
+          <div class="metric-label">RPM overview (demo)</div>
+          <div class="metric-value" id="summaryCompleted">0 RPMs completed</div>
+          <div class="metric-note" id="summaryTarget">Target: 0 · Δ 0</div>
+          <div class="metric-note" id="summaryAvgTime">Avg time: 0 min</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">Top engineer – RPM</div>
+          <div class="metric-value" id="topEngineerName">–</div>
+          <div class="metric-note" id="topEngineerScore">Avg score: –</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout-main">
+      <!-- LEFT: Room map + active RPM + checklist -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Room Map (RPM demo)</h2>
+              <p style="font-size:0.75rem;color:var(--muted);">
+                Tap a room to pre-fill the RPM form.
+              </p>
+            </div>
+            <div class="field sort-toggle">
+              <label>Sort rooms</label>
+              <div class="sort-buttons">
+                <button type="button" class="sort-btn active" data-sort="furthest">Furthest last done</button>
+                <button type="button" class="sort-btn" data-sort="room">Room number</button>
+              </div>
+            </div>
+          </div>
+          <div class="room-map-scroll">
+            <div class="room-map-grid" id="roomMap"></div>
+          </div>
+          <div class="room-legend">
+            <span><span class="legend-dot legend-done"></span>Completed (this period)</span>
+            <span><span class="legend-dot legend-progress"></span>Current active room</span>
+            <span><span class="legend-dot legend-todo"></span>Not yet done</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Active RPM Session (Engineer demo)</h2>
+            <span class="pill accent" id="activeStatusPill">No active room</span>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Room number</label>
+              <input id="roomInput" type="text" inputmode="numeric" placeholder="e.g. 258">
+            </div>
+            <div class="field">
+              <label>Timer</label>
+              <div class="timer-display" id="timerDisplay">00:00</div>
+              <div class="badge-row" id="timerBadges"></div>
+            </div>
+          </div>
+          <div id="lastPmInfo" style="margin-top:6px;font-size:0.75rem;color:var(--muted);">
+            Click a room above to view when it was last done, by who, and their score (demo).
+          </div>
+          <div class="row" style="margin-top:8px;margin-bottom:8px;">
+            <button id="startBtn">Start RPM</button>
+            <button id="pauseBtn" class="secondary" disabled>Pause</button>
+            <button id="resumeBtn" class="secondary" disabled>Resume</button>
+            <button id="completeBtn" disabled>Complete</button>
+            <button id="cancelBtn" class="danger" disabled>Cancel</button>
+          </div>
+          <div style="font-size:0.7rem;color:var(--muted);">
+            This RPM demo keeps everything in your browser only. No data is sent anywhere.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>RPM Checklist (Demo)</h2>
+            <span class="pill">All questions must be answered to complete.</span>
+          </div>
+          <div class="checklist" id="checklistContainer"></div>
+          <div class="field">
+            <label>Overall room notes</label>
+            <textarea id="overallNotes" placeholder="Optional notes for this room"></textarea>
+          </div>
+          <button id="completeBtnBottom" style="margin-top:6px;">Complete RPM (same as above)</button>
+        </div>
       </div>
 
-      <div class="metric-card">
-        <div class="metric-label">Overview (demo)</div>
-        <div class="metric-value" id="summaryCompleted">0 completed</div>
-        <div class="metric-note" id="summaryTarget">Target: 0 · Δ 0</div>
-        <div class="metric-note" id="summaryAvgTime">Avg time: 0 min</div>
-      </div>
+      <!-- RIGHT: Completed RPMs + inspection + ranking + admin + goal -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <h2>Completed RPMs (Demo)</h2>
+            <span class="pill">Tap "Inspect" to open review.</span>
+          </div>
+          <div class="table-scroll">
+            <table class="table" id="sessionsTable">
+              <thead>
+              <tr>
+                <th>Room</th>
+                <th>Engineer</th>
+                <th>Duration</th>
+                <th>Status</th>
+                <th>Review</th>
+                <th></th>
+              </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
 
-      <div class="metric-card">
-        <div class="metric-label">Top engineer (inspection score)</div>
-        <div class="metric-value" id="topEngineerName">–</div>
-        <div class="metric-note" id="topEngineerScore">Avg score: –</div>
+        <div class="card">
+          <div class="card-header">
+            <h2>Inspection (Team Lead demo)</h2>
+            <span class="pill success" id="inspectHeaderLabel">Select a completed RPM</span>
+          </div>
+          <div id="inspectionPanel" style="font-size:0.75rem;color:var(--muted);">
+            No RPM selected yet. Choose a row from "Completed RPMs".
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Engineer Rankings – RPM (Demo)</h2>
+            <span class="pill">Based on inspected RPM scores.</span>
+          </div>
+          <div id="rankingBars"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Admin Demo</h2>
+            <span class="pill">Edit demo engineers, rooms, questions</span>
+          </div>
+          <div class="admin-tabs">
+            <button type="button" class="admin-tab-btn active" data-tab="engineers">Engineers</button>
+            <button type="button" class="admin-tab-btn" data-tab="rooms">Rooms</button>
+            <button type="button" class="admin-tab-btn" data-tab="questions">RPM questions</button>
+          </div>
+          <div id="adminContent"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Goal of this System (Demo)</h2>
+            <span class="pill">Prototype only – not final look</span>
+          </div>
+          <div class="goal-text">
+            <p>
+              This demo is the first step toward a full maintenance platform for our hotels.
+              The long-term goal is:
+            </p>
+            <ul>
+              <li>To run <strong>RPM (room preventive maintenance)</strong> and <strong>Mechanical PM</strong> on separate pages in one system.</li>
+              <li>To <strong>track project time and cost</strong> based on each employee’s hours.</li>
+              <li>To let <strong>each property see only its own data</strong>, while management can see performance for <strong>all properties</strong> in one place.</li>
+              <li>To show <strong>performance dashboards</strong> per property: average RPM time, inspection scores, open and completed projects, and trends.</li>
+              <li>To <strong>track FTE automatically</strong> based on hours worked and workload across all properties.</li>
+              <li>To handle <strong>item ordering, meter tracking, and other maintenance checklists</strong> inside this one system.</li>
+            </ul>
+            <p class="goal-note">
+              Final version will include multi-property views for management, plus RPM, mechanical PM, projects, and labour all in one place.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="layout-main">
-    <!-- LEFT: Room map + PM + checklist -->
-    <div>
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <h2>Room Map (Demo)</h2>
-            <p style="font-size:0.75rem;color:var(--muted);">
-              Tap a room to pre-fill the PM form.
-            </p>
+  <!-- MECHANICAL PM SECTION -->
+  <div id="mechSection">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Mechanical PM – Overview (Demo)</h2>
+          <p style="font-size:0.75rem;color:var(--muted);">
+            Demo of boiler, pump, chiller and other mechanical PM inspections.
+          </p>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric-card">
+          <div class="metric-label">Mechanical period progress (demo data)</div>
+          <div class="row" style="gap:6px;margin-bottom:4px;">
+            <div class="field" style="margin-bottom:0;">
+              <label>Year</label>
+              <select id="mechYearSelect">
+                <option value="2025" selected>2025</option>
+                <option value="2024">2024</option>
+              </select>
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>Period</label>
+              <select id="mechPeriodSelect">
+                <option value="1" selected>Period 1</option>
+                <option value="2">Period 2</option>
+                <option value="3">Period 3</option>
+              </select>
+            </div>
           </div>
-          <div class="field sort-toggle">
-            <label>Sort rooms</label>
-            <div class="sort-buttons">
-              <button type="button" class="sort-btn active" data-sort="furthest">Furthest last done</button>
-              <button type="button" class="sort-btn" data-sort="room">Room number</button>
+          <div class="progress-wrapper">
+            <div class="progress-bar-outer">
+              <div id="mechPeriodProgressBar" class="progress-bar-inner"></div>
+            </div>
+            <div class="progress-meta">
+              <div id="mechPeriodProgressLabel">0 / 0 units completed</div>
+              <div id="mechPeriodProgressPct">0% of target</div>
+              <div style="margin-top:4px;font-size:0.65rem;">
+                Demo target: each mechanical unit serviced once per period.
+              </div>
             </div>
           </div>
         </div>
-        <div class="room-map-scroll">
-          <div class="room-map-grid" id="roomMap"></div>
-        </div>
-        <div class="room-legend">
-          <span><span class="legend-dot legend-done"></span>Completed (this period)</span>
-          <span><span class="legend-dot legend-progress"></span>Current active room</span>
-          <span><span class="legend-dot legend-todo"></span>Not yet done</span>
-        </div>
-      </div>
 
-      <div class="card">
-        <div class="card-header">
-          <h2>Active PM Session (Engineer demo)</h2>
-          <span class="pill accent" id="activeStatusPill">No active room</span>
+        <div class="metric-card">
+          <div class="metric-label">Mechanical overview (demo)</div>
+          <div class="metric-value" id="mechSummaryCompleted">0 PMs completed</div>
+          <div class="metric-note" id="mechSummaryTarget">Target: 0 · Δ 0</div>
+          <div class="metric-note" id="mechSummaryAvgTime">Avg time: 0 min</div>
         </div>
-        <div class="row">
-          <div class="field">
-            <label>Room number</label>
-            <input id="roomInput" type="text" inputmode="numeric" placeholder="e.g. 258">
-          </div>
-          <div class="field">
-            <label>Timer</label>
-            <div class="timer-display" id="timerDisplay">00:00</div>
-            <div class="badge-row" id="timerBadges"></div>
-          </div>
-        </div>
-        <div id="lastPmInfo" style="margin-top:6px;font-size:0.75rem;color:var(--muted);">
-          Click a room above to view when it was last done, by who, and their score (demo).
-        </div>
-        <div class="row" style="margin-top:8px;margin-bottom:8px;">
-          <button id="startBtn">Start PM</button>
-          <button id="pauseBtn" class="secondary" disabled>Pause</button>
-          <button id="resumeBtn" class="secondary" disabled>Resume</button>
-          <button id="completeBtn" disabled>Complete</button>
-          <button id="cancelBtn" class="danger" disabled>Cancel</button>
-        </div>
-        <div style="font-size:0.7rem;color:var(--muted);">
-          This demo keeps everything in your browser only. No data is sent anywhere.
-        </div>
-      </div>
 
-      <div class="card">
-        <div class="card-header">
-          <h2>Checklist (Demo)</h2>
-          <span class="pill">All questions must be answered to complete.</span>
+        <div class="metric-card">
+          <div class="metric-label">Top engineer – Mechanical PM</div>
+          <div class="metric-value" id="mechTopEngineerName">–</div>
+          <div class="metric-note" id="mechTopEngineerScore">Avg score: –</div>
         </div>
-        <div class="checklist" id="checklistContainer"></div>
-        <div class="field">
-          <label>Overall room notes</label>
-          <textarea id="overallNotes" placeholder="Optional notes for this room"></textarea>
-        </div>
-        <button id="completeBtnBottom" style="margin-top:6px;">Complete PM (same as above)</button>
       </div>
     </div>
 
-    <!-- RIGHT: Sessions + inspection + ranking + admin + goal -->
-    <div>
-      <div class="card">
-        <div class="card-header">
-          <h2>Completed PMs (Demo)</h2>
-          <span class="pill">Tap "Inspect" to open review.</span>
-        </div>
-        <div class="table-scroll">
-          <table class="table" id="sessionsTable">
-            <thead>
-            <tr>
-              <th>Room</th>
-              <th>Engineer</th>
-              <th>Duration</th>
-              <th>Status</th>
-              <th>Review</th>
-              <th></th>
-            </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
+    <div class="card">
+      <div class="card-header">
+        <h3>Mechanical Units (Demo)</h3>
+        <span class="pill">Random hotel equipment list.</span>
       </div>
+      <div class="room-map-scroll">
+        <div class="room-map-grid" id="mechUnitGrid"></div>
+      </div>
+      <div class="room-legend">
+        <span><span class="legend-dot legend-done"></span>Unit completed (this period)</span>
+        <span><span class="legend-dot legend-progress"></span>Current active unit</span>
+        <span><span class="legend-dot legend-todo"></span>Not yet done</span>
+      </div>
+    </div>
 
-      <div class="card">
-        <div class="card-header">
-          <h2>Inspection (Team Lead demo)</h2>
-          <span class="pill success" id="inspectHeaderLabel">Select a completed PM</span>
+    <!-- ACTIVE MECHANICAL PM SESSION -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Active Mechanical PM Session (Engineer demo)</h3>
+        <span class="pill accent" id="mechActiveStatusPill">No active unit</span>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Mechanical unit</label>
+          <select id="mechUnitSelect">
+            <option value="">Select unit…</option>
+          </select>
         </div>
-        <div id="inspectionPanel" style="font-size:0.75rem;color:var(--muted);">
-          No PM selected yet. Choose a row from "Completed PMs".
+        <div class="field">
+          <label>Timer</label>
+          <div class="timer-display" id="mechTimerDisplay">00:00</div>
+          <div class="badge-row" id="mechTimerBadges"></div>
         </div>
       </div>
+      <div id="mechLastPmInfo" style="margin-top:6px;font-size:0.75rem;color:var(--muted);">
+        Select a unit above to view when it was last done, by who, and the score (demo).
+      </div>
+      <div class="row" style="margin-top:8px;margin-bottom:8px;">
+        <button id="mechStartBtn">Start PM</button>
+        <button id="mechPauseBtn" class="secondary" disabled>Pause</button>
+        <button id="mechResumeBtn" class="secondary" disabled>Resume</button>
+        <button id="mechCompleteBtn" disabled>Complete</button>
+        <button id="mechCancelBtn" class="danger" disabled>Cancel</button>
+      </div>
+      <div style="font-size:0.7rem;color:var(--muted);">
+        This mechanical PM demo also stays in your browser only. No data is sent anywhere.
+      </div>
+    </div>
 
-      <div class="card">
-        <div class="card-header">
-          <h2>Engineer Rankings (Demo)</h2>
-          <span class="pill">Based on inspection scores.</span>
-        </div>
-        <div id="rankingBars"></div>
+    <div class="card">
+      <div class="card-header">
+        <h3>Mechanical PM Checklist (Demo)</h3>
+        <span class="pill">All questions must be answered to complete.</span>
       </div>
+      <div class="checklist" id="mechChecklistContainer"></div>
+      <div class="field">
+        <label>Overall unit notes</label>
+        <textarea id="mechOverallNotes" placeholder="Optional notes for this mechanical unit"></textarea>
+      </div>
+      <button id="mechCompleteBtnBottom" style="margin-top:6px;">
+        Complete mechanical PM (same as above)
+      </button>
+    </div>
 
-      <div class="card">
-        <div class="card-header">
-          <h2>Admin Demo</h2>
-          <span class="pill">Edit demo engineers, rooms, questions</span>
-        </div>
-        <div id="adminContent"></div>
+    <div class="card">
+      <div class="card-header">
+        <h3>Completed Mechanical PMs (Demo)</h3>
+        <span class="pill">Random inspections per unit + ones you add.</span>
       </div>
+      <div class="table-scroll">
+        <table class="table" id="mechSessionsTable">
+          <thead>
+          <tr>
+            <th>Unit</th>
+            <th>Engineer</th>
+            <th>Duration</th>
+            <th>Status</th>
+            <th>Review</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div style="margin-top:8px;">
+        <h3 style="margin-bottom:4px;">Mechanical inspection details</h3>
+        <div id="mechInspectionPanel" style="font-size:0.75rem;color:var(--muted);">
+          Select a row above to see details.
+        </div>
+      </div>
+    </div>
 
-      <div class="card">
-        <div class="card-header">
-          <h2>Goal of this System (Demo)</h2>
-          <span class="pill">Prototype only – not final look</span>
-        </div>
-        <div class="goal-text">
-          <p>
-            This demo is the first step toward a full maintenance platform for our hotels.
-            The long-term goal is:
-          </p>
-          <ul>
-            <li>To run <strong>Room PM (RPM)</strong> and <strong>Mechanical PM</strong> on separate pages in one system.</li>
-            <li>To <strong>track project time and cost</strong> based on each employee’s hours.</li>
-            <li>To let <strong>each property see only its own data</strong>, while management can see performance for <strong>all properties</strong> in one place.</li>
-            <li>To show <strong>performance dashboards</strong> per property: average RPM time, inspection scores, open and completed projects, and trends.</li>
-            <li>To <strong>track FTE automatically</strong> based on hours worked and workload across all properties.</li>
-            <li>To handle <strong>item ordering, meter tracking, and other maintenance checklists</strong> inside this one system.</li>
-          </ul>
-          <p class="goal-note">
-            Final version will include multi-property views for management, plus RPM, mechanical PM, projects, and labour all in one place.
-          </p>
-        </div>
+    <div class="card">
+      <div class="card-header">
+        <h3>Engineer Rankings – Mechanical PM (Demo)</h3>
+        <span class="pill">Based on mechanical PM review scores.</span>
       </div>
+      <div id="mechRankingBars"></div>
     </div>
   </div>
 </div>
 
 <script>
-  // --- Demo data (no Supabase, all in memory) ---
+  // --- RPM demo data (rooms) ---
 
-  // Full room list (deduped)
   let demoRooms = Array.from(new Set(`
 258
 259
@@ -1448,7 +1668,7 @@
   let sessions = [];
   let nextSessionId = 1;
 
-  const currentUser = demoEngineers[0]; // Team lead demo user
+  const currentUser = { ...demoEngineers[0] }; // Team lead demo user
 
   let currentSession = null;
   let currentAnswers = {};
@@ -1458,8 +1678,45 @@
   let currentReviewState = {};
   let adminActiveTab = "engineers";
   let roomSortMode = "furthest";
+  let currentMode = "RPM";
 
-  // --- Helpers ---
+  // --- Mechanical PM demo data ---
+
+  const mechUnits = [
+    { id: "MECH001", name: "Boiler #1 – East Tower", location: "Basement boiler room", type: "Boiler" },
+    { id: "MECH002", name: "Boiler #2 – East Tower", location: "Basement boiler room", type: "Boiler" },
+    { id: "MECH003", name: "Chiller #1 – River View", location: "Roof level", type: "Chiller" },
+    { id: "MECH004", name: "Cooling Tower Cell 1", location: "Roof mechanical yard", type: "Cooling tower" },
+    { id: "MECH005", name: "Cooling Tower Cell 2", location: "Roof mechanical yard", type: "Cooling tower" },
+    { id: "MECH006", name: "Domestic HW Pump 1A", location: "Basement mech room", type: "Hot water pump" },
+    { id: "MECH007", name: "Domestic HW Pump 1B", location: "Basement mech room", type: "Hot water pump" },
+    { id: "MECH008", name: "Fire Pump", location: "Fire pump room", type: "Fire pump" },
+    { id: "MECH009", name: "Sprinkler Jockey Pump", location: "Fire pump room", type: "Jockey pump" },
+    { id: "MECH010", name: "Makeup Air Unit – Corridor 5", location: "Level 5 service corridor", type: "MAU" },
+    { id: "MECH011", name: "Pool Dehumidifier", location: "Pool mechanical room", type: "Dehumidifier" },
+    { id: "MECH012", name: "Spa Circulation Pump", location: "Spa mechanical room", type: "Pump" }
+  ];
+
+  const mechQuestions = [
+    { id: 101, section: "General", text: "Unit running smoothly with no abnormal noise or vibration." },
+    { id: 102, section: "General", text: "No active alarms on control panel." },
+    { id: 103, section: "Safety", text: "Guards, doors, and access panels secure." },
+    { id: 104, section: "Safety", text: "Emergency stop tested (where applicable)." },
+    { id: 105, section: "Mechanical", text: "No leaks on piping, valves, or seals." },
+    { id: 106, section: "Mechanical", text: "Belts, couplings, and moving parts in good condition." },
+    { id: 107, section: "Electrical", text: "No exposed wiring; connections appear secure." },
+    { id: 108, section: "Housekeeping", text: "Area clear of clutter; safe access around unit." }
+  ];
+
+  let mechSessions = [];
+  let nextMechSessionId = 1;
+
+  let mechCurrentSession = null;
+  let mechCurrentAnswers = {};
+  let mechTimerStart = null;
+  let mechTimerInterval = null;
+
+  // --- Shared helper ---
 
   function formatSeconds(sec) {
     sec = Math.max(0, Math.floor(sec));
@@ -1467,6 +1724,23 @@
     const s = sec % 60;
     return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
   }
+
+  function hookKeyboardEnterToBlur() {
+    function handleKey(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        e.target.blur();
+      }
+    }
+    document.querySelectorAll("input, textarea").forEach(el => {
+      if (!el.dataset.enterListener) {
+        el.addEventListener("keydown", handleKey);
+        el.dataset.enterListener = "1";
+      }
+    });
+  }
+
+  // --- RPM logic ---
 
   function getTotalRoomsForTarget() {
     return demoRooms.length;
@@ -1481,9 +1755,7 @@
     const roomsDone = new Set(filtered.map(s => s.roomNumber));
     const doneCount = roomsDone.size;
     const totalRooms = getTotalRoomsForTarget();
-    const pct = totalRooms === 0
-      ? 0
-      : Math.round((doneCount / totalRooms) * 100);
+    const pct = totalRooms === 0 ? 0 : Math.round((doneCount / totalRooms) * 100);
     return { doneCount, pct, totalRooms };
   }
 
@@ -1492,7 +1764,7 @@
     const totalCompleted = completed.length;
     const totalSeconds = completed.reduce((sum, s) => sum + (s.totalSeconds || 0), 0);
     const avgSeconds = totalCompleted ? totalSeconds / totalCompleted : 0;
-    const targetPerDay = 10; // chosen target
+    const targetPerDay = 10; // demo target
     const target = targetPerDay;
     const delta = totalCompleted - target;
     return {
@@ -1551,8 +1823,6 @@
     return result;
   }
 
-  // --- Renderers ---
-
   function renderPeriodProgress() {
     const year = document.getElementById("yearSelect").value;
     const period = document.getElementById("periodSelect").value;
@@ -1569,7 +1839,7 @@
   function renderSummary() {
     const s = getSummaryForTodayDemo();
     document.getElementById("summaryCompleted").textContent =
-      `${s.totalCompleted} PMs completed (demo)`;
+      `${s.totalCompleted} RPMs completed (demo)`;
     document.getElementById("summaryTarget").textContent =
       `Demo target: ${s.target} · Δ ${s.delta >= 0 ? "+" : ""}${s.delta}`;
     document.getElementById("summaryAvgTime").textContent =
@@ -1617,7 +1887,7 @@
       const div = document.createElement("div");
       div.className = "room-chip " + computeRoomStatusForMap(room);
       div.textContent = room;
-      div.title = "Click to start PM for room " + room;
+      div.title = "Click to start RPM for room " + room;
       div.addEventListener("click", () => {
         const roomInput = document.getElementById("roomInput");
         roomInput.value = room;
@@ -1643,7 +1913,7 @@
     if (!currentSession ||
         (currentSession.status !== "in_progress" && currentSession.status !== "paused")) {
       container.innerHTML =
-        '<div style="font-size:0.75rem;color:var(--muted);">Start a PM session above to see the checklist.</div>';
+        '<div style="font-size:0.75rem;color:var(--muted);">Start an RPM session above to see the checklist.</div>';
       return;
     }
 
@@ -1718,6 +1988,8 @@
           container.appendChild(block);
         });
     });
+
+    hookKeyboardEnterToBlur();
   }
 
   function selectAnswer(questionId, answer, block, clickedBtn) {
@@ -1925,7 +2197,7 @@
     container.innerHTML = "";
     const scores = computeEngineerScores();
     if (!scores.length) {
-      container.textContent = "No inspections yet in this demo.";
+      container.textContent = "No RPM inspections yet in this demo.";
       document.getElementById("topEngineerName").textContent = "–";
       document.getElementById("topEngineerScore").textContent = "Avg score: –";
       return;
@@ -1960,7 +2232,7 @@
     selectedInspectionSessionId = sessionId;
     const session = sessions.find(s => s.id === sessionId);
     const headerLabel = document.getElementById("inspectHeaderLabel");
-    headerLabel.textContent = "Inspecting room " + session.roomNumber + " · " + session.engineerName;
+    headerLabel.textContent = "Inspecting RPM for room " + session.roomNumber + " · " + session.engineerName;
     headerLabel.className = "pill success";
 
     currentReviewState = {};
@@ -2055,7 +2327,7 @@
     label.textContent = "Overall review notes";
     const textarea = document.createElement("textarea");
     textarea.id = "reviewNotes";
-    textarea.placeholder = "Summary of this inspection (demo).";
+    textarea.placeholder = "Summary of this RPM inspection (demo).";
     textarea.value = session.review && session.review.notes ? session.review.notes : "";
     notesField.appendChild(label);
     notesField.appendChild(textarea);
@@ -2081,6 +2353,8 @@
     actionRow.appendChild(saveBtn);
     panel.appendChild(actionRow);
     panel.appendChild(passFailHint);
+
+    hookKeyboardEnterToBlur();
   }
 
   function saveReviewForSession(sessionId) {
@@ -2125,7 +2399,7 @@
     headerLabel.className = "pill success";
   }
 
-  // --- Admin demo panel ---
+  // --- Admin demo helpers (RPM) ---
 
   function renameRoom(oldRoom, newRoom) {
     const idx = demoRooms.indexOf(oldRoom);
@@ -2422,146 +2696,12 @@
       ? last.review.score + "% (" + (last.review.pass ? "PASS" : "FAIL") + ")"
       : "Not inspected yet";
     infoDiv.textContent =
-      "Last PM: " + dateStr +
+      "Last RPM: " + dateStr +
       " · Engineer: " + last.engineerName +
       " · Score: " + scoreText;
   }
 
-  function hookKeyboardEnterToBlur() {
-    function handleKey(e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        e.target.blur();
-      }
-    }
-    document.querySelectorAll("input, textarea").forEach(el => {
-      el.addEventListener("keydown", handleKey);
-    });
-  }
-
-  function attachEvents() {
-    document.getElementById("yearSelect").addEventListener("change", () => {
-      renderPeriodProgress();
-      renderRoomMap();
-    });
-    document.getElementById("periodSelect").addEventListener("change", () => {
-      renderPeriodProgress();
-      renderRoomMap();
-    });
-
-    // sort buttons
-    document.querySelectorAll(".sort-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        roomSortMode = btn.dataset.sort || "furthest";
-        document.querySelectorAll(".sort-btn").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        renderRoomMap();
-      });
-    });
-
-    const roomInput = document.getElementById("roomInput");
-    roomInput.addEventListener("change", () => {
-      updateLastPmInfo(roomInput.value.trim());
-    });
-    roomInput.addEventListener("blur", () => {
-      updateLastPmInfo(roomInput.value.trim());
-    });
-
-    document.getElementById("startBtn").addEventListener("click", () => {
-      const room = document.getElementById("roomInput").value.trim();
-      if (!room) {
-        alert("Enter a room number to start the PM (demo).");
-        return;
-      }
-      if (currentSession &&
-          (currentSession.status === "in_progress" || currentSession.status === "paused")) {
-        const ok = confirm("There is already an active/paused PM. This demo will cancel it and start a new one. Continue?");
-        if (!ok) return;
-      }
-      const now = new Date();
-      currentSession = {
-        id: nextSessionId++,
-        roomNumber: room,
-        engineerCode: currentUser.code,
-        engineerName: currentUser.name,
-        year: 2025,
-        period: Number(document.getElementById("periodSelect").value) || 1,
-        status: "in_progress",
-        startedAt: now.toISOString(),
-        endedAt: null,
-        totalSeconds: 0,
-        overallNotes: "",
-        answers: []
-      };
-      resetCurrentAnswers();
-      renderChecklist();
-      renderActiveSession();
-      renderRoomMap();
-      updateButtonsForStatus();
-      startTimer();
-      updateLastPmInfo(room);
-    });
-
-    document.getElementById("pauseBtn").addEventListener("click", () => {
-      pauseTimer();
-      updateButtonsForStatus();
-      renderRoomMap();
-    });
-
-    document.getElementById("resumeBtn").addEventListener("click", () => {
-      if (!currentSession) return;
-      currentSession.status = "in_progress";
-      startTimer();
-      updateButtonsForStatus();
-      renderActiveSession();
-      renderRoomMap();
-    });
-
-    function completeFlow() {
-      if (!currentSession) {
-        alert("No active PM to complete (demo).");
-        return;
-      }
-      if (!allQuestionsAnswered()) {
-        alert("Please answer all questions before completing this PM (demo).");
-        return;
-      }
-      stopTimerAndComplete();
-      currentSession.status = "completed";
-      currentSession.endedAt = new Date().toISOString();
-      currentSession.overallNotes = document.getElementById("overallNotes").value.trim();
-      currentSession.answers = questions.map(q => ({
-        questionId: q.id,
-        answer: currentAnswers[q.id].answer,
-        note: currentAnswers[q.id].note || ""
-      }));
-      sessions.push(currentSession);
-      renderSessionsTable();
-      renderSummary();
-      renderPeriodProgress();
-      renderRoomMap();
-      clearActiveSessionState();
-    }
-
-    document.getElementById("completeBtn").addEventListener("click", completeFlow);
-    document.getElementById("completeBtnBottom").addEventListener("click", completeFlow);
-
-    document.getElementById("cancelBtn").addEventListener("click", () => {
-      if (!currentSession) return;
-      const ok = confirm("Cancel this PM? (Demo only – this just clears the active session.)");
-      if (!ok) return;
-      clearActiveSessionState();
-    });
-
-    document.querySelectorAll(".admin-tab-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        adminActiveTab = btn.dataset.tab;
-        renderAdminPanel();
-      });
-    });
-
-    hookKeyboardEnterToBlur();
-  }
+  // --- Seed RPM demo data ---
 
   function seedDemoSessions() {
     const generated = [];
@@ -2642,9 +2782,961 @@
     nextSessionId = idCounter;
   }
 
+  // --- Mechanical PM logic ---
+
+  function seedMechanicalDemo() {
+    const generated = [];
+    let idCounter = 1;
+    const baseDate = new Date("2025-01-01T07:00:00-05:00");
+    const periods = [1,2,3];
+
+    mechUnits.forEach((unit, idx) => {
+      const rand = Math.random();
+      let numSessions;
+      if (rand < 0.3) numSessions = 1;
+      else if (rand < 0.8) numSessions = 2;
+      else numSessions = 3;
+
+      for (let i = 0; i < numSessions; i++) {
+        const engineer = demoEngineers[Math.floor(Math.random() * demoEngineers.length)];
+        const period = periods[(idx + i) % periods.length];
+        const dayOffset = Math.floor(Math.random() * 180);
+        const startDate = new Date(baseDate.getTime() + dayOffset * 24 * 60 * 60 * 1000);
+        const durationMinutes = 20 + Math.floor(Math.random() * 31); // 20–50 min
+        const endDate = new Date(startDate.getTime() + durationMinutes * 60 * 1000);
+
+        const answersArr = mechQuestions.map(q => {
+          const r = Math.random();
+          let ans;
+          if (r < 0.75) ans = "yes";
+          else if (r < 0.9) ans = "no";
+          else ans = "na";
+          const note = ans === "no" && Math.random() < 0.6 ? "Requires follow-up work order." : "";
+          return { questionId: q.id, answer: ans, note };
+        });
+
+        let passCount = 0;
+        let failCount = 0;
+        const reviewItems = mechQuestions.map(q => {
+          const ansObj = answersArr.find(a => a.questionId === q.id);
+          let status;
+          if (!ansObj || ansObj.answer === "na") status = "na";
+          else if (ansObj.answer === "yes") status = "pass";
+          else status = "fail";
+          if (status === "pass") passCount++;
+          else if (status === "fail") failCount++;
+          return { questionId: q.id, status, note: "" };
+        });
+        const denom = passCount + failCount;
+        const score = denom ? Math.round((passCount / denom) * 100) : 0;
+        const passBool = score >= 80;
+
+        const reviewObj = {
+          reviewerName: "Alex Carter",
+          score,
+          pass: passBool,
+          notes: passBool ? "Mechanical PM looks good." : "Monitor this unit closely.",
+          items: reviewItems
+        };
+
+        generated.push({
+          id: idCounter++,
+          unitId: unit.id,
+          unitName: unit.name,
+          engineerCode: engineer.code,
+          engineerName: engineer.name,
+          year: 2025,
+          period,
+          status: "closed",
+          startedAt: startDate.toISOString(),
+          endedAt: endDate.toISOString(),
+          totalSeconds: durationMinutes * 60,
+          overallNotes: "",
+          answers: answersArr,
+          review: reviewObj
+        });
+      }
+    });
+
+    mechSessions = generated;
+    nextMechSessionId = idCounter;
+  }
+
+  function getMechPeriodProgress(year, period) {
+    const filtered = mechSessions.filter(s =>
+      s.year === Number(year) &&
+      s.period === Number(period) &&
+      (s.status === "completed" || s.status === "closed")
+    );
+    const unitsDone = new Set(filtered.map(s => s.unitId));
+    const doneCount = unitsDone.size;
+    const totalUnits = mechUnits.length;
+    const pct = totalUnits === 0 ? 0 : Math.round((doneCount / totalUnits) * 100);
+    return { doneCount, pct, totalUnits };
+  }
+
+  function getMechSummaryForTodayDemo() {
+    const completed = mechSessions.filter(s => s.status === "completed" || s.status === "closed");
+    const totalCompleted = completed.length;
+    const totalSeconds = completed.reduce((sum, s) => sum + (s.totalSeconds || 0), 0);
+    const avgSeconds = totalCompleted ? totalSeconds / totalCompleted : 0;
+    const targetPerDay = 5; // demo target for mechanical
+    const target = targetPerDay;
+    const delta = totalCompleted - target;
+    return {
+      totalCompleted,
+      target,
+      delta,
+      avgSeconds
+    };
+  }
+
+  function renderMechPeriodProgress() {
+    const year = document.getElementById("mechYearSelect").value;
+    const period = document.getElementById("mechPeriodSelect").value;
+    const { doneCount, pct, totalUnits } = getMechPeriodProgress(year, period);
+
+    const bar = document.getElementById("mechPeriodProgressBar");
+    const label = document.getElementById("mechPeriodProgressLabel");
+    const pctLabel = document.getElementById("mechPeriodProgressPct");
+
+    bar.style.height = pct + "%";
+    label.textContent = `${doneCount} / ${totalUnits} units completed`;
+    pctLabel.textContent = `${pct}% of period target (demo).`;
+  }
+
+  function renderMechSummary() {
+    const s = getMechSummaryForTodayDemo();
+    document.getElementById("mechSummaryCompleted").textContent =
+      `${s.totalCompleted} mechanical PMs completed (demo)`;
+    document.getElementById("mechSummaryTarget").textContent =
+      `Demo target: ${s.target} · Δ ${s.delta >= 0 ? "+" : ""}${s.delta}`;
+    document.getElementById("mechSummaryAvgTime").textContent =
+      `Avg time: ${Math.round(s.avgSeconds/60)} min`;
+  }
+
+  function getMechLastCompletedSessionForUnit(unitId) {
+    const relevant = mechSessions.filter(s =>
+      s.unitId === unitId &&
+      (s.status === "completed" || s.status === "closed")
+    );
+    if (!relevant.length) return null;
+    relevant.sort((a,b) => {
+      const ta = new Date(a.endedAt || a.startedAt).getTime();
+      const tb = new Date(b.endedAt || b.startedAt).getTime();
+      return tb - ta;
+    });
+    return relevant[0];
+  }
+
+  function getMechLastDoneTimestamp(unitId) {
+    const last = getMechLastCompletedSessionForUnit(unitId);
+    if (!last) return null;
+    const t = last.endedAt || last.startedAt;
+    if (!t) return null;
+    return new Date(t).getTime();
+  }
+
+  function renderMechUnits() {
+    const grid = document.getElementById("mechUnitGrid");
+    grid.innerHTML = "";
+
+    const year = Number(document.getElementById("mechYearSelect").value);
+    const period = Number(document.getElementById("mechPeriodSelect").value);
+
+    mechUnits.forEach(unit => {
+      const div = document.createElement("div");
+      let statusClass = "todo";
+      const anyCompleted = mechSessions.some(s =>
+        s.unitId === unit.id &&
+        s.year === year &&
+        s.period === period &&
+        (s.status === "completed" || s.status === "closed")
+      );
+      if (anyCompleted) statusClass = "done";
+      if (mechCurrentSession && mechCurrentSession.unitId === unit.id &&
+          (mechCurrentSession.status === "in_progress" || mechCurrentSession.status === "paused")) {
+        statusClass = "in-progress";
+      }
+      div.className = "room-chip " + statusClass;
+      div.textContent = unit.name.replace(" –", "");
+      div.title = `${unit.name}\n${unit.location}\nType: ${unit.type}`;
+      div.addEventListener("click", () => {
+        const sel = document.getElementById("mechUnitSelect");
+        sel.value = unit.id;
+        sel.blur();
+        updateMechLastPmInfo(unit.id);
+        document.getElementById("mechStartBtn").scrollIntoView({ behavior:"smooth", block:"center" });
+      });
+      grid.appendChild(div);
+    });
+  }
+
+  function renderMechSessionsTable() {
+    const tbody = document.querySelector("#mechSessionsTable tbody");
+    tbody.innerHTML = "";
+
+    mechSessions
+      .slice()
+      .sort((a,b) => a.id - b.id)
+      .forEach(s => {
+        const tr = document.createElement("tr");
+
+        const tdUnit = document.createElement("td");
+        tdUnit.textContent = s.unitName;
+        tr.appendChild(tdUnit);
+
+        const tdEng = document.createElement("td");
+        tdEng.textContent = s.engineerName;
+        tr.appendChild(tdEng);
+
+        const tdDur = document.createElement("td");
+        tdDur.textContent = formatSeconds(s.totalSeconds || 0);
+        tr.appendChild(tdDur);
+
+        const tdStatus = document.createElement("td");
+        tdStatus.textContent = s.status === "closed" ? "Closed" : "Completed";
+        tr.appendChild(tdStatus);
+
+        const tdRev = document.createElement("td");
+        if (s.review) {
+          tdRev.innerHTML =
+            '<span style="color:' + (s.review.pass ? '#16a34a' : '#e11d48') + ';">' +
+            (s.review.pass ? "Pass" : "Fail") +
+            "</span><br><small>" + s.review.score + "%</small>";
+        } else {
+          tdRev.innerHTML = '<span style="color:#f59e0b;">Not reviewed</span>';
+        }
+        tr.appendChild(tdRev);
+
+        const tdAction = document.createElement("td");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "View";
+        btn.className = "secondary";
+        btn.addEventListener("click", () => openMechInspection(s.id));
+        tdAction.appendChild(btn);
+        tr.appendChild(tdAction);
+
+        tbody.appendChild(tr);
+      });
+  }
+
+  function computeMechEngineerScores() {
+    const map = {};
+    for (const s of mechSessions) {
+      if (!s.review) continue;
+      const code = s.engineerCode;
+      if (!map[code]) {
+        map[code] = { engineerCode: code, engineerName: s.engineerName, scores: [] };
+      }
+      if (typeof s.review.score === "number") {
+        map[code].scores.push(s.review.score);
+      }
+    }
+    const result = Object.values(map).map(e => {
+      const avg = e.scores.length
+        ? e.scores.reduce((a,b) => a + b, 0) / e.scores.length
+        : 0;
+      return {
+        engineerCode: e.engineerCode,
+        engineerName: e.engineerName,
+        avgScore: Math.round(avg)
+      };
+    });
+    result.sort((a,b) => b.avgScore - a.avgScore);
+    return result;
+  }
+
+  function renderMechRanking() {
+    const container = document.getElementById("mechRankingBars");
+    container.innerHTML = "";
+    const scores = computeMechEngineerScores();
+    if (!scores.length) {
+      container.textContent = "No mechanical PM inspections yet in this demo.";
+      document.getElementById("mechTopEngineerName").textContent = "–";
+      document.getElementById("mechTopEngineerScore").textContent = "Avg score: –";
+      return;
+    }
+
+    scores.forEach(e => {
+      const row = document.createElement("div");
+      row.className = "bar-row";
+      const lbl = document.createElement("div");
+      lbl.className = "bar-label";
+      lbl.textContent = e.engineerName;
+      const track = document.createElement("div");
+      track.className = "bar-track";
+      const fill = document.createElement("div");
+      fill.className = "bar-fill";
+      fill.style.width = e.avgScore + "%";
+      track.appendChild(fill);
+      const val = document.createElement("div");
+      val.className = "bar-value";
+      val.textContent = e.avgScore + "%";
+      row.appendChild(lbl);
+      row.appendChild(track);
+      row.appendChild(val);
+      container.appendChild(row);
+    });
+
+    const top = scores[0];
+    document.getElementById("mechTopEngineerName").textContent = top.engineerName;
+    document.getElementById("mechTopEngineerScore").textContent = "Avg score: " + top.avgScore + "%";
+  }
+
+  function openMechInspection(sessionId) {
+    const panel = document.getElementById("mechInspectionPanel");
+    const session = mechSessions.find(s => s.id === sessionId);
+    if (!session) {
+      panel.textContent = "Mechanical PM not found (demo).";
+      return;
+    }
+
+    panel.innerHTML = "";
+    const info = document.createElement("div");
+    info.style.marginBottom = "6px";
+    info.innerHTML =
+      '<div style="margin-bottom:4px;">Unit <strong>' + session.unitName +
+      "</strong> · Engineer <strong>" + session.engineerName + "</strong></div>" +
+      '<div style="font-size:0.7rem;color:var(--muted);">' +
+      "Duration: " + formatSeconds(session.totalSeconds || 0) +
+      " · Status: " + (session.status === "closed" ? "Closed" : "Completed") +
+      "</div>" +
+      '<div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">' +
+      "Review score: " + (session.review ? session.review.score + "% (" + (session.review.pass ? "PASS" : "FAIL") + ")" : "N/A") +
+      "</div>";
+    panel.appendChild(info);
+
+    const list = document.createElement("div");
+    list.style.maxHeight = "240px";
+    list.style.overflowY = "auto";
+    list.style.paddingRight = "4px";
+
+    mechQuestions.forEach(q => {
+      const ans = session.answers.find(a => a.questionId === q.id);
+      const engineerAnswer = ans ? ans.answer.toUpperCase() : "–";
+      const engineerNote = ans && ans.note ? ans.note : "";
+
+      const box = document.createElement("div");
+      box.className = "inspect-box";
+
+      const title = document.createElement("div");
+      title.style.fontSize = "0.8rem";
+      title.textContent = q.text;
+      box.appendChild(title);
+
+      const sub = document.createElement("div");
+      sub.style.fontSize = "0.7rem";
+      sub.style.color = "var(--muted)";
+      sub.innerHTML =
+        "Engineer answer: <strong>" + engineerAnswer + "</strong>" +
+        (engineerNote ? " · Note: " + engineerNote : "");
+      box.appendChild(sub);
+
+      list.appendChild(box);
+    });
+
+    panel.appendChild(list);
+
+    if (session.review && session.review.notes) {
+      const notesDiv = document.createElement("div");
+      notesDiv.style.fontSize = "0.7rem";
+      notesDiv.style.color = "var(--muted)";
+      notesDiv.style.marginTop = "4px";
+      notesDiv.textContent = "Reviewer notes: " + session.review.notes;
+      panel.appendChild(notesDiv);
+    }
+  }
+
+  // Mechanical active session helpers
+
+  function mechResetAnswers() {
+    mechCurrentAnswers = {};
+    mechQuestions.forEach(q => {
+      mechCurrentAnswers[q.id] = { answer: null, note: "" };
+    });
+  }
+
+  function mechRenderChecklist() {
+    const container = document.getElementById("mechChecklistContainer");
+    container.innerHTML = "";
+
+    if (!mechCurrentSession ||
+        (mechCurrentSession.status !== "in_progress" && mechCurrentSession.status !== "paused")) {
+      container.innerHTML =
+        '<div style="font-size:0.75rem;color:var(--muted);">Start a mechanical PM session above to see the checklist.</div>';
+      return;
+    }
+
+    const sectionOrder = ["General","Safety","Mechanical","Electrical","Housekeeping"];
+
+    sectionOrder.forEach(sectionName => {
+      mechQuestions
+        .filter(q => q.section === sectionName)
+        .forEach(q => {
+          const block = document.createElement("div");
+          block.className = "question-block";
+          block.dataset.questionId = String(q.id);
+
+          const header = document.createElement("div");
+          header.className = "question-header";
+
+          const left = document.createElement("div");
+          const qText = document.createElement("div");
+          qText.className = "question-text";
+          qText.textContent = q.text;
+          const qSec = document.createElement("div");
+          qSec.className = "question-section";
+          qSec.textContent = sectionName;
+          left.appendChild(qText);
+          left.appendChild(qSec);
+          header.appendChild(left);
+          block.appendChild(header);
+
+          const btnRow = document.createElement("div");
+          btnRow.className = "answer-buttons";
+
+          ["yes","no","na"].forEach(kind => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "answer-btn " + kind;
+            btn.textContent = kind.toUpperCase();
+            btn.addEventListener("click", () => {
+              mechSelectAnswer(q.id, kind, block, btn);
+            });
+            btnRow.appendChild(btn);
+          });
+
+          block.appendChild(btnRow);
+
+          const meta = document.createElement("div");
+          meta.className = "question-meta";
+          const ansSpan = document.createElement("span");
+          ansSpan.textContent = "Answer: –";
+          ansSpan.dataset.metaType = "answer";
+          const noteSpan = document.createElement("span");
+          noteSpan.textContent = "";
+          noteSpan.dataset.metaType = "note";
+
+          const noteBtn = document.createElement("button");
+          noteBtn.type = "button";
+          noteBtn.className = "secondary";
+          noteBtn.style.fontSize = "0.65rem";
+          noteBtn.textContent = "Add note";
+          noteBtn.addEventListener("click", () => {
+            const note = prompt("Note for this question:", mechCurrentAnswers[q.id].note || "");
+            if (note !== null) {
+              mechCurrentAnswers[q.id].note = note.trim();
+              noteSpan.textContent = note ? "Note: " + note : "";
+            }
+          });
+
+          meta.appendChild(ansSpan);
+          meta.appendChild(noteSpan);
+          meta.appendChild(noteBtn);
+          block.appendChild(meta);
+
+          container.appendChild(block);
+        });
+    });
+
+    hookKeyboardEnterToBlur();
+  }
+
+  function mechSelectAnswer(questionId, answer, block, clickedBtn) {
+    mechCurrentAnswers[questionId].answer = answer;
+    const btns = block.querySelectorAll(".answer-btn");
+    btns.forEach(btn => {
+      btn.classList.remove("selected", "yes", "no", "na");
+      if (btn === clickedBtn) {
+        btn.classList.add("selected", answer);
+      }
+    });
+    const metaAns = block.querySelector(".question-meta span[data-meta-type='answer']");
+    if (metaAns) {
+      metaAns.textContent = "Answer: " + answer.toUpperCase();
+    }
+  }
+
+  function mechRenderActiveSession() {
+    const pill = document.getElementById("mechActiveStatusPill");
+    const badges = document.getElementById("mechTimerBadges");
+    badges.innerHTML = "";
+
+    if (!mechCurrentSession) {
+      pill.textContent = "No active unit";
+      pill.className = "pill accent";
+      return;
+    }
+
+    const statusLabel = mechCurrentSession.status === "in_progress" ? "In progress" :
+                        mechCurrentSession.status === "paused" ? "Paused" :
+                        mechCurrentSession.status;
+    pill.textContent = `${mechCurrentSession.unitName} · ${statusLabel}`;
+    pill.className = "pill accent";
+
+    const b1 = document.createElement("span");
+    b1.className = "pill";
+    b1.textContent = `Engineer (demo): ${mechCurrentSession.engineerName}`;
+    badges.appendChild(b1);
+
+    const b2 = document.createElement("span");
+    b2.className = "pill";
+    b2.textContent = `Period: ${mechCurrentSession.period}, Year: ${mechCurrentSession.year}`;
+    badges.appendChild(b2);
+  }
+
+  function mechRenderTimer() {
+    const display = document.getElementById("mechTimerDisplay");
+    if (!mechCurrentSession) {
+      display.textContent = "00:00";
+      return;
+    }
+    let base = mechCurrentSession.totalSeconds || 0;
+    if (mechCurrentSession.status === "in_progress" && mechTimerStart != null) {
+      const elapsed = (Date.now() - mechTimerStart) / 1000;
+      base += elapsed;
+    }
+    display.textContent = formatSeconds(base);
+  }
+
+  function mechStartTimer() {
+    if (mechTimerInterval) clearInterval(mechTimerInterval);
+    mechTimerStart = Date.now();
+    mechTimerInterval = setInterval(mechRenderTimer, 1000);
+  }
+
+  function mechPauseTimer() {
+    if (!mechCurrentSession || mechCurrentSession.status !== "in_progress") return;
+    const elapsed = (Date.now() - mechTimerStart) / 1000;
+    mechCurrentSession.totalSeconds = (mechCurrentSession.totalSeconds || 0) + elapsed;
+    mechTimerStart = null;
+    mechCurrentSession.status = "paused";
+    if (mechTimerInterval) clearInterval(mechTimerInterval);
+    mechRenderTimer();
+    mechRenderActiveSession();
+    renderMechUnits();
+  }
+
+  function mechStopTimerAndComplete() {
+    if (!mechCurrentSession) return;
+    if (mechCurrentSession.status === "in_progress" && mechTimerStart != null) {
+      const elapsed = (Date.now() - mechTimerStart) / 1000;
+      mechCurrentSession.totalSeconds = (mechCurrentSession.totalSeconds || 0) + elapsed;
+    }
+    mechTimerStart = null;
+    if (mechTimerInterval) clearInterval(mechTimerInterval);
+    mechTimerInterval = null;
+    mechRenderTimer();
+  }
+
+  function mechClearActiveSessionState() {
+    mechCurrentSession = null;
+    mechTimerStart = null;
+    if (mechTimerInterval) clearInterval(mechTimerInterval);
+    mechTimerInterval = null;
+    mechRenderTimer();
+    mechRenderActiveSession();
+    document.getElementById("mechUnitSelect").value = "";
+    document.getElementById("mechOverallNotes").value = "";
+    mechResetAnswers();
+    mechRenderChecklist();
+    mechUpdateButtons();
+    updateMechLastPmInfo("");
+    renderMechUnits();
+  }
+
+  function mechUpdateButtons() {
+    const startBtn = document.getElementById("mechStartBtn");
+    const pauseBtn = document.getElementById("mechPauseBtn");
+    const resumeBtn = document.getElementById("mechResumeBtn");
+    const completeBtn = document.getElementById("mechCompleteBtn");
+    const cancelBtn = document.getElementById("mechCancelBtn");
+    const completeBottom = document.getElementById("mechCompleteBtnBottom");
+
+    if (!mechCurrentSession) {
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      resumeBtn.disabled = true;
+      completeBtn.disabled = true;
+      cancelBtn.disabled = true;
+      completeBottom.disabled = true;
+      return;
+    }
+
+    if (mechCurrentSession.status === "in_progress") {
+      startBtn.disabled = true;
+      pauseBtn.disabled = false;
+      resumeBtn.disabled = true;
+      completeBtn.disabled = false;
+      cancelBtn.disabled = false;
+      completeBottom.disabled = false;
+    } else if (mechCurrentSession.status === "paused") {
+      startBtn.disabled = true;
+      pauseBtn.disabled = true;
+      resumeBtn.disabled = false;
+      completeBtn.disabled = false;
+      cancelBtn.disabled = false;
+      completeBottom.disabled = false;
+    } else {
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      resumeBtn.disabled = true;
+      completeBtn.disabled = true;
+      cancelBtn.disabled = true;
+      completeBottom.disabled = true;
+    }
+  }
+
+  function mechAllQuestionsAnswered() {
+    return mechQuestions.every(q => {
+      const ans = mechCurrentAnswers[q.id];
+      return ans && ans.answer;
+    });
+  }
+
+  function updateMechLastPmInfo(unitId) {
+    const infoDiv = document.getElementById("mechLastPmInfo");
+    if (!unitId) {
+      infoDiv.textContent =
+        "Select a unit above to view when it was last done, by who, and the score (demo).";
+      return;
+    }
+    const last = getMechLastCompletedSessionForUnit(unitId);
+    const unit = mechUnits.find(u => u.id === unitId);
+    const name = unit ? unit.name : unitId;
+    if (!last) {
+      infoDiv.textContent =
+        name + " has never been completed in this demo data.";
+      return;
+    }
+    const tStr = last.endedAt || last.startedAt;
+    let dateStr = "Unknown date";
+    if (tStr) {
+      dateStr = new Date(tStr).toLocaleString("en-CA", { timeZone: "America/Toronto" });
+    }
+    const scoreText = last.review
+      ? last.review.score + "% (" + (last.review.pass ? "PASS" : "FAIL") + ")"
+      : "Not inspected yet";
+    infoDiv.textContent =
+      "Last mechanical PM: " + dateStr +
+      " · Engineer: " + last.engineerName +
+      " · Score: " + scoreText;
+  }
+
+  // --- Mode switch (RPM / PM) ---
+
+  function switchMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll(".mode-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.mode === mode);
+    });
+
+    const rpmSection = document.getElementById("rpmSection");
+    const mechSection = document.getElementById("mechSection");
+
+    if (mode === "RPM") {
+      rpmSection.style.display = "block";
+      mechSection.style.display = "none";
+    } else {
+      rpmSection.style.display = "none";
+      mechSection.style.display = "block";
+    }
+  }
+
+  // --- Events ---
+
+  function attachEvents() {
+    // Mode buttons
+    document.querySelectorAll(".mode-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const mode = btn.dataset.mode || "RPM";
+        switchMode(mode);
+      });
+    });
+
+    document.getElementById("yearSelect").addEventListener("change", () => {
+      renderPeriodProgress();
+      renderRoomMap();
+    });
+    document.getElementById("periodSelect").addEventListener("change", () => {
+      renderPeriodProgress();
+      renderRoomMap();
+    });
+
+    // RPM sort buttons
+    document.querySelectorAll(".sort-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        roomSortMode = btn.dataset.sort || "furthest";
+        document.querySelectorAll(".sort-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderRoomMap();
+      });
+    });
+
+    const roomInput = document.getElementById("roomInput");
+    roomInput.addEventListener("change", () => {
+      updateLastPmInfo(roomInput.value.trim());
+    });
+    roomInput.addEventListener("blur", () => {
+      updateLastPmInfo(roomInput.value.trim());
+    });
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+      const room = document.getElementById("roomInput").value.trim();
+      if (!room) {
+        alert("Enter a room number to start the RPM (demo).");
+        return;
+      }
+      if (currentSession &&
+          (currentSession.status === "in_progress" || currentSession.status === "paused")) {
+        const ok = confirm("There is already an active/paused RPM. This demo will cancel it and start a new one. Continue?");
+        if (!ok) return;
+      }
+      const now = new Date();
+      currentSession = {
+        id: nextSessionId++,
+        roomNumber: room,
+        engineerCode: currentUser.code,
+        engineerName: currentUser.name,
+        year: 2025,
+        period: Number(document.getElementById("periodSelect").value) || 1,
+        status: "in_progress",
+        startedAt: now.toISOString(),
+        endedAt: null,
+        totalSeconds: 0,
+        overallNotes: "",
+        answers: []
+      };
+      resetCurrentAnswers();
+      renderChecklist();
+      renderActiveSession();
+      renderRoomMap();
+      updateButtonsForStatus();
+      startTimer();
+      updateLastPmInfo(room);
+    });
+
+    document.getElementById("pauseBtn").addEventListener("click", () => {
+      pauseTimer();
+      updateButtonsForStatus();
+      renderRoomMap();
+    });
+
+    document.getElementById("resumeBtn").addEventListener("click", () => {
+      if (!currentSession) return;
+      currentSession.status = "in_progress";
+      startTimer();
+      updateButtonsForStatus();
+      renderActiveSession();
+      renderRoomMap();
+    });
+
+    function completeFlow() {
+      if (!currentSession) {
+        alert("No active RPM to complete (demo).");
+        return;
+      }
+      if (!allQuestionsAnswered()) {
+        alert("Please answer all questions before completing this RPM (demo).");
+        return;
+      }
+      stopTimerAndComplete();
+      currentSession.status = "completed";
+      currentSession.endedAt = new Date().toISOString();
+      currentSession.overallNotes = document.getElementById("overallNotes").value.trim();
+      currentSession.answers = questions.map(q => ({
+        questionId: q.id,
+        answer: currentAnswers[q.id].answer,
+        note: currentAnswers[q.id].note || ""
+      }));
+      sessions.push(currentSession);
+      renderSessionsTable();
+      renderSummary();
+      renderPeriodProgress();
+      renderRoomMap();
+      clearActiveSessionState();
+    }
+
+    document.getElementById("completeBtn").addEventListener("click", completeFlow);
+    document.getElementById("completeBtnBottom").addEventListener("click", completeFlow);
+
+    document.getElementById("cancelBtn").addEventListener("click", () => {
+      if (!currentSession) return;
+      const ok = confirm("Cancel this RPM? (Demo only – this just clears the active session.)");
+      if (!ok) return;
+      clearActiveSessionState();
+    });
+
+    document.querySelectorAll(".admin-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        adminActiveTab = btn.dataset.tab;
+        renderAdminPanel();
+      });
+    });
+
+    // Mechanical selectors
+    const mechYearSel = document.getElementById("mechYearSelect");
+    const mechPeriodSel = document.getElementById("mechPeriodSelect");
+    mechYearSel.addEventListener("change", () => {
+      renderMechPeriodProgress();
+      renderMechUnits();
+    });
+    mechPeriodSel.addEventListener("change", () => {
+      renderMechPeriodProgress();
+      renderMechUnits();
+    });
+
+    // Mechanical unit select
+    const mechUnitSelect = document.getElementById("mechUnitSelect");
+    mechUnitSelect.addEventListener("change", () => {
+      updateMechLastPmInfo(mechUnitSelect.value);
+    });
+    mechUnitSelect.addEventListener("blur", () => {
+      updateMechLastPmInfo(mechUnitSelect.value);
+    });
+
+    // Mechanical start/pause/resume/complete/cancel
+    document.getElementById("mechStartBtn").addEventListener("click", () => {
+      const unitId = mechUnitSelect.value;
+      if (!unitId) {
+        alert("Select a mechanical unit to start the PM (demo).");
+        return;
+      }
+      if (mechCurrentSession &&
+          (mechCurrentSession.status === "in_progress" || mechCurrentSession.status === "paused")) {
+        const ok = confirm("There is already an active/paused mechanical PM. This demo will cancel it and start a new one. Continue?");
+        if (!ok) return;
+      }
+
+      const unit = mechUnits.find(u => u.id === unitId);
+      const now = new Date();
+      mechCurrentSession = {
+        id: nextMechSessionId++,
+        unitId,
+        unitName: unit ? unit.name : unitId,
+        engineerCode: currentUser.code,
+        engineerName: currentUser.name,
+        year: 2025,
+        period: Number(mechPeriodSel.value) || 1,
+        status: "in_progress",
+        startedAt: now.toISOString(),
+        endedAt: null,
+        totalSeconds: 0,
+        overallNotes: "",
+        answers: [],
+        review: null
+      };
+      mechResetAnswers();
+      mechRenderChecklist();
+      mechRenderActiveSession();
+      mechUpdateButtons();
+      mechStartTimer();
+      updateMechLastPmInfo(unitId);
+      renderMechUnits();
+    });
+
+    document.getElementById("mechPauseBtn").addEventListener("click", () => {
+      mechPauseTimer();
+      mechUpdateButtons();
+    });
+
+    document.getElementById("mechResumeBtn").addEventListener("click", () => {
+      if (!mechCurrentSession) return;
+      mechCurrentSession.status = "in_progress";
+      mechStartTimer();
+      mechUpdateButtons();
+      mechRenderActiveSession();
+      renderMechUnits();
+    });
+
+    function mechCompleteFlow() {
+      if (!mechCurrentSession) {
+        alert("No active mechanical PM to complete (demo).");
+        return;
+      }
+      if (!mechAllQuestionsAnswered()) {
+        alert("Please answer all questions before completing this mechanical PM (demo).");
+        return;
+      }
+      mechStopTimerAndComplete();
+      mechCurrentSession.status = "closed";
+      mechCurrentSession.endedAt = new Date().toISOString();
+      mechCurrentSession.overallNotes = document.getElementById("mechOverallNotes").value.trim();
+      mechCurrentSession.answers = mechQuestions.map(q => ({
+        questionId: q.id,
+        answer: mechCurrentAnswers[q.id].answer,
+        note: mechCurrentAnswers[q.id].note || ""
+      }));
+
+      // Auto-review based on YES/NO
+      let passCount = 0;
+      let failCount = 0;
+      const items = mechQuestions.map(q => {
+        const ansObj = mechCurrentAnswers[q.id];
+        let status;
+        if (!ansObj || ansObj.answer === "na") status = "na";
+        else if (ansObj.answer === "yes") status = "pass";
+        else status = "fail";
+        if (status === "pass") passCount++;
+        else if (status === "fail") failCount++;
+        return { questionId: q.id, status, note: "" };
+      });
+      const denom = passCount + failCount;
+      const score = denom ? Math.round((passCount / denom) * 100) : 0;
+      const passBool = score >= 80;
+
+      mechCurrentSession.review = {
+        reviewerName: currentUser.name,
+        score,
+        pass: passBool,
+        notes: passBool ? "Auto-reviewed: looks good." : "Auto-reviewed: check issues.",
+        items
+      };
+
+      mechSessions.push(mechCurrentSession);
+      renderMechSessionsTable();
+      renderMechSummary();
+      renderMechPeriodProgress();
+      renderMechUnits();
+      renderMechRanking();
+      mechClearActiveSessionState();
+    }
+
+    document.getElementById("mechCompleteBtn").addEventListener("click", mechCompleteFlow);
+    document.getElementById("mechCompleteBtnBottom").addEventListener("click", mechCompleteFlow);
+
+    document.getElementById("mechCancelBtn").addEventListener("click", () => {
+      if (!mechCurrentSession) return;
+      const ok = confirm("Cancel this mechanical PM? (Demo only – this just clears the active session.)");
+      if (!ok) return;
+      mechClearActiveSessionState();
+    });
+
+    hookKeyboardEnterToBlur();
+  }
+
+  // --- Init ---
+
   function initDemo() {
+    // Seed data
     seedDemoSessions();
     resetCurrentAnswers();
+
+    seedMechanicalDemo();
+    mechResetAnswers();
+
+    // Fill mechanical unit select
+    const mechUnitSelect = document.getElementById("mechUnitSelect");
+    mechUnits.forEach(u => {
+      const opt = document.createElement("option");
+      opt.value = u.id;
+      opt.textContent = u.name;
+      mechUnitSelect.appendChild(opt);
+    });
+
+    // RPM initial render
     renderChecklist();
     renderPeriodProgress();
     renderSummary();
@@ -2654,7 +3746,19 @@
     renderSessionsTable();
     renderRanking();
     renderAdminPanel();
+
+    // Mechanical initial render
+    renderMechPeriodProgress();
+    renderMechSummary();
+    renderMechUnits();
+    renderMechSessionsTable();
+    renderMechRanking();
+    mechRenderChecklist();
+    mechRenderActiveSession();
+    mechRenderTimer();
+
     attachEvents();
+    switchMode("RPM"); // start with RPM visible
   }
 
   document.addEventListener("DOMContentLoaded", initDemo);
